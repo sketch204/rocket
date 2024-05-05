@@ -12,8 +12,6 @@ final class RocketParsingTests: XCTestCase {
     
     # Creating Tables
     
-    > @v(tags)
-    
     Like a `List` you can create a table by passing in an array of `Identifiable` items to a `Table` struct which is followed by a builder. Unlike a `List`, you do not create views in the builder. Instead you define **columns**. Tables must be defined in terms of columns.
 
     > [!note]

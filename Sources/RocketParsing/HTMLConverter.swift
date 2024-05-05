@@ -3,6 +3,8 @@ import Markdown
 struct HTMLConverter {
     let markdown: String
     
+    var documentContext: [String: String] = [:]
+    
     mutating func generateHTML() -> String {
         let document = Document(parsing: markdown, options: [.parseBlockDirectives])
         return visit(document)
@@ -34,7 +36,13 @@ extension HTMLConverter: MarkupVisitor {
     mutating func visitBlockDirective(_ blockDirective: BlockDirective) -> String {
         switch blockDirective.name {
         case "Meta":
-            print("Arguments: \(blockDirective.argumentText.parseNameValueArguments().map({ "\($0.name): \($0.value)" }))")
+            let arguments = blockDirective.argumentText.parseNameValueArguments()
+            print("Metadata: \(arguments.map({ "\($0.name): \($0.value)" }))")
+            
+            for argument in arguments {
+                documentContext[argument.name] = argument.value
+            }
+            
             return ""
             
         default: return ""
