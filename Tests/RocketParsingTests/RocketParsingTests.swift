@@ -4,13 +4,14 @@ import Markdown
 
 final class RocketParsingTests: XCTestCase {
     let sampleMarkdown = """
-    @Meta(
-        title: "From C to Swift - Part 1",
-        description: "Learn to how to integrate C system libraries into your Swift code",
-        tags: "swift swiftpm c",
-    )
+    ---
+    title: From C to Swift - Part 1
+    description: Learn to how to integrate C system libraries into your Swift code
+    tags: swift swiftpm c
+    ---
     
     # Creating Tables
+    tags: {{ tags }}
     
     Like a `List` you can create a table by passing in an array of `Identifiable` items to a `Table` struct which is followed by a builder. Unlike a `List`, you do not create views in the builder. Instead you define **columns**. Tables must be defined in terms of columns.
 
@@ -52,7 +53,7 @@ final class RocketParsingTests: XCTestCase {
     func testExample() throws {
         var converter = HTMLConverter(markdown: sampleMarkdown)
         
-        let html = converter.generateHTML()
+        let html = try converter.generateHTML()
         
         print("""
         ## Original document:

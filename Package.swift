@@ -17,6 +17,7 @@ let package = Package(
     dependencies: [
         .package(url: "https://github.com/apple/swift-argument-parser.git", from: "1.2.0"),
         .package(url: "https://github.com/apple/swift-markdown.git", branch: "main"),
+        .package(url: "https://github.com/stencilproject/Stencil.git", from: "0.15.1"),
     ],
     targets: [
         // Targets are the basic building blocks of a package, defining a module or a test suite.
@@ -32,6 +33,7 @@ let package = Package(
             name: "RocketParsing",
             dependencies: [
                 .product(name: "Markdown", package: "swift-markdown"),
+                .product(name: "Stencil", package: "Stencil"),
             ]
         ),
         .testTarget(
@@ -39,6 +41,7 @@ let package = Package(
             dependencies: [
                 "RocketParsing",
                 .product(name: "Markdown", package: "swift-markdown"),
+                .product(name: "Stencil", package: "Stencil"),
             ]
         ),
     ]

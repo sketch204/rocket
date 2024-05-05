@@ -1,12 +1,28 @@
 import Markdown
+import Stencil
 
-struct HTMLConverter {
-    let markdown: String
+public struct HTMLConverter {
+    public let markdown: String
+    public var documentContext: [String: String] = [:]
     
-    var documentContext: [String: String] = [:]
+    internal let environment = Environment()
     
-    mutating func generateHTML() -> String {
+    public init(markdown: String, documentContext: [String : String] = [:]) {
+        self.markdown = markdown
+        self.documentContext = documentContext
+    }
+    
+    public mutating func generateHTML() throws -> String {
+        let frontmatter = parseFrontmatter(from: markdown)
+        
+        documentContext.merge(frontmatter, uniquingKeysWith: { $1 })
+        
+        var markdown = removeFrontmatter(from: markdown)
+        
+        markdown = try environment.renderTemplate(string: markdown, context: documentContext)
+        
         let document = Document(parsing: markdown, options: [.parseBlockDirectives])
+        
         return visit(document)
     }
 }
@@ -25,27 +41,11 @@ extension HTMLConverter: MarkupVisitor {
         }
     }
     
-    mutating func defaultVisit(_ markup: any Markup) -> String {
+    public mutating func defaultVisit(_ markup: any Markup) -> String {
         if let element = markup as? HTMLConvertable {
             return element.rawHTML(defaultDescend(markup))
         } else {
             return defaultDescend(markup)
-        }
-    }
-    
-    mutating func visitBlockDirective(_ blockDirective: BlockDirective) -> String {
-        switch blockDirective.name {
-        case "Meta":
-            let arguments = blockDirective.argumentText.parseNameValueArguments()
-            print("Metadata: \(arguments.map({ "\($0.name): \($0.value)" }))")
-            
-            for argument in arguments {
-                documentContext[argument.name] = argument.value
-            }
-            
-            return ""
-            
-        default: return ""
         }
     }
 }
