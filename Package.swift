@@ -5,6 +5,7 @@ import PackageDescription
 
 let package = Package(
     name: "Rocket",
+    platforms: [.macOS(.v13)],
     products: [
         .executable(name: "Rocket", targets: ["Rocket"]),
         
