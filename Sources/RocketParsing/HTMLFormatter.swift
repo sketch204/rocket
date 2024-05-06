@@ -26,10 +26,12 @@ struct HTMLFormatterOptions: OptionSet {
     static let parseInlineAttributeClass = HTMLFormatterOptions(rawValue: 1 << 1)
     
     static let escapeHTMLReservedSymbols = HTMLFormatterOptions(rawValue: 1 << 2)
+    
+    static let injectAsideTitles = HTMLFormatterOptions(rawValue: 1 << 3)
 }
 
 extension HTMLFormatterOptions {
-    static let defaultOptions: HTMLFormatterOptions = [.parseAsides, .parseInlineAttributeClass, escapeHTMLReservedSymbols]
+    static let defaultOptions: HTMLFormatterOptions = [.parseAsides, .parseInlineAttributeClass, escapeHTMLReservedSymbols, .injectAsideTitles]
 }
 
 /// A ``MarkupWalker`` that prints rendered HTML for a given ``Markup`` tree.
@@ -65,7 +67,11 @@ struct HTMLFormatter: MarkupWalker {
     mutating func visitBlockQuote(_ blockQuote: BlockQuote) -> () {
         if blockQuote.isAside() {
             let aside = Aside(blockQuote)
-            result += "<aside data-kind=\"\(htmlEncoded(aside.kind.rawValue.lowercased()))\">\n"
+            let asideKind = htmlEncoded(aside.kind.rawValue)
+            result += "<aside data-kind=\"\(asideKind.lowercased())\">\n"
+            if options.contains(.injectAsideTitles) {
+                result += "<h1>\(asideKind.capitalized)</h1>"
+            }
             for child in aside.content {
                 visit(child)
             }
