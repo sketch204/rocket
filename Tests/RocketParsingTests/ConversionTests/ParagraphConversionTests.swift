@@ -10,7 +10,7 @@ final class ParagraphConversionTests: XCTestCase {
         var converter = HTMLConverter(markdown: markdown)
         let html = try converter.generateHTML()
         let expectedHTML = """
-        <body><p>This is a paragraph</p></body>
+        <p>This is a paragraph</p>
         """
         XCTAssertEqual(html, expectedHTML)
     }
@@ -24,7 +24,7 @@ final class ParagraphConversionTests: XCTestCase {
         var converter = HTMLConverter(markdown: markdown)
         let html = try converter.generateHTML()
         let expectedHTML = """
-        <body><p>This is a paragraph<br/>This is still the same paragraph</p></body>
+        <p>This is a paragraph\nThis is still the same paragraph</p>
         """
         XCTAssertEqual(html, expectedHTML)
     }
@@ -40,7 +40,7 @@ final class ParagraphConversionTests: XCTestCase {
         var converter = HTMLConverter(markdown: markdown)
         let html = try converter.generateHTML()
         let expectedHTML = """
-        <body><p>This is a paragraph<br/>This is still the same paragraph</p><p>This is a different paragraph</p></body>
+        <p>This is a paragraph\nThis is still the same paragraph</p><p>This is a different paragraph</p>
         """
         XCTAssertEqual(html, expectedHTML)
     }

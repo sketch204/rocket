@@ -18,13 +18,13 @@ final class CodeBlockConversionTests: XCTestCase {
         var converter = HTMLConverter(markdown: markdown)
         let html = try converter.generateHTML()
         let expectedHTML = """
-        <body><pre><code>
-        module SwiftLibraryName {
-            header "bridgingHeaderName"
-            link "CLibraryName"
+        <pre><code>module SwiftLibraryName {
+            header &quot;bridgingHeaderName&quot;
+            link &quot;CLibraryName&quot;
             export *
         }
-        </code></pre></body>
+        </code></pre>
+        
         """
         XCTAssertEqual(html, expectedHTML)
     }
@@ -46,16 +46,16 @@ final class CodeBlockConversionTests: XCTestCase {
         var converter = HTMLConverter(markdown: markdown)
         let html = try converter.generateHTML()
         let expectedHTML = """
-        <body><pre><code class="lang-swift">
-        let package = Package(
-            name: "Curses",
+        <pre><code class="language-swift">let package = Package(
+            name: &quot;Curses&quot;,
             products: [...],
             targets: [
-                .target(name: "Curses", dependencies: ["Cncurses"]),  // Add dependency here
-                .systemLibrary(name: "Cncurses", path: "Sources/Cncurses"),
+                .target(name: &quot;Curses&quot;, dependencies: [&quot;Cncurses&quot;]),  // Add dependency here
+                .systemLibrary(name: &quot;Cncurses&quot;, path: &quot;Sources/Cncurses&quot;),
             ]
         )
-        </code></pre></body>
+        </code></pre>
+        
         """
         XCTAssertEqual(html, expectedHTML)
     }
@@ -72,9 +72,9 @@ final class CodeBlockConversionTests: XCTestCase {
         var converter = HTMLConverter(markdown: markdown)
         let html = try converter.generateHTML()
         let expectedHTML = """
-        <body><pre><code class="lang-c">
-        #include &lt;ncurses.h&gt;
-        </code></pre></body>
+        <pre><code class="language-c">#include &lt;ncurses.h&gt;
+        </code></pre>
+        
         """
         XCTAssertEqual(html, expectedHTML)
     }

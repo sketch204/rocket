@@ -10,7 +10,7 @@ final class HeadingConversionTests: XCTestCase {
         var converter = HTMLConverter(markdown: markdown)
         let html = try converter.generateHTML()
         let expectedHTML = """
-        <body><h1>Heading</h1></body>
+        <h1>Heading</h1>
         """
         XCTAssertEqual(html, expectedHTML)
     }
@@ -23,7 +23,7 @@ final class HeadingConversionTests: XCTestCase {
         var converter = HTMLConverter(markdown: markdown)
         let html = try converter.generateHTML()
         let expectedHTML = """
-        <body><h2>Heading</h2></body>
+        <h2>Heading</h2>
         """
         XCTAssertEqual(html, expectedHTML)
     }
@@ -36,7 +36,7 @@ final class HeadingConversionTests: XCTestCase {
         var converter = HTMLConverter(markdown: markdown)
         let html = try converter.generateHTML()
         let expectedHTML = """
-        <body><h3>Heading</h3></body>
+        <h3>Heading</h3>
         """
         XCTAssertEqual(html, expectedHTML)
     }
@@ -49,7 +49,7 @@ final class HeadingConversionTests: XCTestCase {
         var converter = HTMLConverter(markdown: markdown)
         let html = try converter.generateHTML()
         let expectedHTML = """
-        <body><h4>Heading</h4></body>
+        <h4>Heading</h4>
         """
         XCTAssertEqual(html, expectedHTML)
     }
@@ -62,7 +62,7 @@ final class HeadingConversionTests: XCTestCase {
         var converter = HTMLConverter(markdown: markdown)
         let html = try converter.generateHTML()
         let expectedHTML = """
-        <body><h5>Heading</h5></body>
+        <h5>Heading</h5>
         """
         XCTAssertEqual(html, expectedHTML)
     }
@@ -75,7 +75,7 @@ final class HeadingConversionTests: XCTestCase {
         var converter = HTMLConverter(markdown: markdown)
         let html = try converter.generateHTML()
         let expectedHTML = """
-        <body><h6>Heading</h6></body>
+        <h6>Heading</h6>
         """
         XCTAssertEqual(html, expectedHTML)
     }
@@ -88,7 +88,7 @@ final class HeadingConversionTests: XCTestCase {
         var converter = HTMLConverter(markdown: markdown)
         let html = try converter.generateHTML()
         let expectedHTML = """
-        <body><p>######## Heading</p></body>
+        <p>######## Heading</p>
         """
         XCTAssertEqual(html, expectedHTML)
     }
@@ -105,7 +105,7 @@ final class HeadingConversionTests: XCTestCase {
         var converter = HTMLConverter(markdown: markdown)
         let html = try converter.generateHTML()
         let expectedHTML = """
-        <body><h1>Heading</h1><h2>Heading 2</h2><h4>Heading 4</h4></body>
+        <h1>Heading</h1><h2>Heading 2</h2><h4>Heading 4</h4>
         """
         XCTAssertEqual(html, expectedHTML)
     }
