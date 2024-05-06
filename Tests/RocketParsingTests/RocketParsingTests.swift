@@ -65,4 +65,19 @@ final class RocketParsingTests: XCTestCase {
         \(html)
         """)
     }
+    
+    func test_reservedHTMLCharactersReplaced() throws {
+        let markdown = """
+        This "text" doesn't not use reserved `<HTML>` characters &
+        """
+        
+        print(Document(parsing: markdown, options: []).debugDescription())
+        
+        var converter = HTMLConverter(markdown: markdown)
+        let html = try converter.generateHTML()
+        let expectedHTML = """
+        <body><p>This &qout;text&qout; doesn&apos;t not use reserved <code>&lt;HTML&gt;</code> characters &amp;</p></body>
+        """
+        XCTAssertEqual(html, expectedHTML)
+    }
 }

@@ -21,7 +21,7 @@ public struct HTMLConverter {
         
         markdown = try environment.renderTemplate(string: markdown, context: documentContext)
         
-        let document = Document(parsing: markdown, options: [.parseBlockDirectives])
+        let document = Document(parsing: markdown, options: [.parseBlockDirectives, .disableSmartOpts])
         
         return visit(document)
     }
@@ -32,9 +32,9 @@ extension HTMLConverter: MarkupVisitor {
     private mutating func defaultDescend(_ markup: any Markup) -> String {
         if markup.childCount == 0 {
             if let markup = markup as? InlineCode {
-                markup.code
+                markup.code.htmlEncoded
             } else {
-                (markup as? Text).map({ $0.string }) ?? ""
+                (markup as? Text).map({ $0.string.htmlEncoded }) ?? ""
             }
         } else {
             markup.children.map({ visit($0) }).joined()

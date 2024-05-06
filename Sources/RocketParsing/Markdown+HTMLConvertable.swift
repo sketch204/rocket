@@ -25,7 +25,7 @@ extension CodeBlock: HTMLConvertable {
         
         return """
         <pre><code\(languageClass)>
-        \(code)
+        \(code.trimmingCharacters(in: .newlines).htmlEncoded)
         </code></pre>
         """
     }
