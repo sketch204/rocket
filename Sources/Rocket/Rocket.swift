@@ -12,18 +12,12 @@ import TOMLKit
 
 @main
 struct Rocket: ParsableCommand {
-    static let configFileName = "rocket.toml"
-    
     var workingDirectory: Path {
         Path.current
     }
     
-    var configFile: Path {
-        workingDirectory + Path(Self.configFileName)
-    }
-    
     mutating func run() throws {
-        let config = try loadConfig()
+        let config = try Config.loadDefault()
         
         let articleFileName = "article"
         let outputDirectoryName = "dist"
@@ -37,7 +31,7 @@ struct Rocket: ParsableCommand {
         
         var converter = HTMLConverter(
             markdown: articleString,
-            templatesDirecotryPath: templatesPath(config: config)
+            templatesDirecotryPath: config.templatesPath
         )
         let articleHtml = try converter.generateHTML()
         
@@ -53,15 +47,5 @@ struct Rocket: ParsableCommand {
         print(config)
         print("=== HTML ===")
         print(articleHtml)
-    }
-    
-    func loadConfig() throws -> TOMLTable {
-        try TOMLTable(
-            string: String(contentsOf: configFile.url)
-        )
-    }
-    
-    func templatesPath(config: TOMLTable) -> Path? {
-        config["templates_path"]?.string.map { workingDirectory + Path($0) }
     }
 }
