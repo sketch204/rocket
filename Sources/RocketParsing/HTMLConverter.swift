@@ -8,12 +8,12 @@ public struct HTMLConverter {
     
     internal let environment: Environment
     
-    public init(markdown: String, templatesDirecotryPath: String? = nil, documentContext: [String : String] = [:]) {
+    public init(markdown: String, templatesDirecotryPath: Path? = nil, documentContext: [String : String] = [:]) {
         self.markdown = markdown
         self.documentContext = documentContext
         self.environment = Environment(
             loader: FileSystemLoader(
-                paths: templatesDirecotryPath.map({ [Path($0)] }) ?? []
+                paths: templatesDirecotryPath.map({ [$0] }) ?? []
             )
         )
     }

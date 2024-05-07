@@ -6,34 +6,33 @@
 
 import ArgumentParser
 import Foundation
+import PathKit
 import RocketParsing
 import TOMLKit
 
 @main
 struct Rocket: ParsableCommand {
-    var workingDirectoryUrl: URL {
-        URL(fileURLWithPath: FileManager.default.currentDirectoryPath)
+    static let configFileName = "rocket.toml"
+    
+    var workingDirectory: Path {
+        Path.current
     }
     
-    var configFileUrl: URL {
-        workingDirectoryUrl.appending(path: ".rocket.toml")
+    var configFile: Path {
+        workingDirectory + Path(Self.configFileName)
     }
     
     mutating func run() throws {
         let config = try loadConfig()
         
         let articleFileName = "article"
-        let outputDirectory = "dist"
+        let outputDirectoryName = "dist"
         
-        let outputDirectoryUrl = workingDirectoryUrl
-            .appending(path: outputDirectory, directoryHint: .isDirectory)
-        
-        try createDirectoryIfNeeded(at: outputDirectoryUrl)
+        let outputDirectory = workingDirectory + Path(outputDirectoryName)
+        try outputDirectory.mkpath()
         
         let articleString = try String(
-            contentsOf: workingDirectoryUrl
-                .appending(path: articleFileName)
-                .appendingPathExtension("md")
+            contentsOf: (workingDirectory + Path("\(articleFileName).md")).url
         )
         
         var converter = HTMLConverter(
@@ -46,13 +45,11 @@ struct Rocket: ParsableCommand {
             fatalError("Failed to parse string into data")
         }
         
-        let articleOutputUrl = outputDirectoryUrl
-            .appending(path: articleFileName)
-            .appendingPathExtension("html")
+        let articleOutputUrl = outputDirectory + Path("\(articleFileName).html")
         
-        try articleData.write(to: articleOutputUrl, options: .atomic)
+        try articleData.write(to: articleOutputUrl.url, options: .atomic)
         
-        print(FileManager.default.currentDirectoryPath)
+        print(workingDirectory)
         print(config)
         print("=== HTML ===")
         print(articleHtml)
@@ -60,17 +57,11 @@ struct Rocket: ParsableCommand {
     
     func loadConfig() throws -> TOMLTable {
         try TOMLTable(
-            string: String(contentsOf: configFileUrl)
+            string: String(contentsOf: configFile.url)
         )
     }
     
-    func templatesPath(config: TOMLTable) -> String? {
-        config["templates_path"]?.string.map { "\(workingDirectoryUrl.path())\($0)" }
-    }
-    
-    func createDirectoryIfNeeded(at url: URL) throws {
-        let fm = FileManager.default
-        
-        try fm.createDirectory(at: url, withIntermediateDirectories: true)
+    func templatesPath(config: TOMLTable) -> Path? {
+        config["templates_path"]?.string.map { workingDirectory + Path($0) }
     }
 }
