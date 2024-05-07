@@ -18,6 +18,7 @@ let package = Package(
         .package(url: "https://github.com/apple/swift-argument-parser.git", from: "1.2.0"),
         .package(url: "https://github.com/apple/swift-markdown.git", branch: "main"),
         .package(url: "https://github.com/stencilproject/Stencil.git", from: "0.15.1"),
+        .package(url: "https://github.com/LebJe/TOMLKit.git", from: "0.5.0")
     ],
     targets: [
         // Targets are the basic building blocks of a package, defining a module or a test suite.
@@ -25,7 +26,10 @@ let package = Package(
         .executableTarget(
             name: "Rocket",
             dependencies: [
+                "RocketParsing",
                 .product(name: "ArgumentParser", package: "swift-argument-parser"),
+                .product(name: "TOMLKit", package: "TOMLKit"),
+                .product(name: "Stencil", package: "Stencil"),
             ]
         ),
         
