@@ -5,13 +5,19 @@ import TOMLKit
 struct Config {
     let templatesPath: Path
     let outputPath: Path
+    let assetsPaths: [Path]
+    let ignoredPaths: [Path]
     
     init(
         templatesPath: Path = defaultTemplatesPath,
-        outputPath: Path = defaultOutputPath
+        outputPath: Path = defaultOutputPath,
+        assetsPaths: [Path] = [defaultAssetsPath],
+        ignoredPaths: [Path] = []
     ) {
         self.templatesPath = templatesPath
         self.outputPath = outputPath
+        self.assetsPaths = assetsPaths
+        self.ignoredPaths = ignoredPaths
     }
 }
 
@@ -44,6 +50,8 @@ extension Config: Decodable {
     enum CodingKeys: String, CodingKey {
         case templatesPath
         case outputPath
+        case assetsPaths
+        case ignoredPaths
     }
     
     init(from decoder: any Decoder) throws {
@@ -54,6 +62,12 @@ extension Config: Decodable {
         
         let outputRelativePath = try container.decodeIfPresent(String.self, forKey: .outputPath) ?? Self.defaultOutputDirectoryName
         self.outputPath = .current + Path(outputRelativePath)
+        
+        let assetsRelativePaths = try container.decodeIfPresent([String].self, forKey: .assetsPaths) ?? [Self.defaultOutputDirectoryName]
+        self.assetsPaths = assetsRelativePaths.map { .current + Path($0) }
+        
+        let ignoredRelativePaths = try container.decodeIfPresent([String].self, forKey: .ignoredPaths) ?? []
+        self.ignoredPaths = ignoredRelativePaths.map { .current + Path($0) }
     }
 }
 
@@ -68,4 +82,7 @@ extension Config {
     
     static let defaultOutputDirectoryName = "dist"
     static var defaultOutputPath: Path { .current + Path(defaultOutputDirectoryName) }
+    
+    static let defaultAssetsDirectoryName = "assets"
+    static var defaultAssetsPath: Path { .current + Path(defaultAssetsDirectoryName) }
 }
