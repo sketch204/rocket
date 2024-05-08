@@ -1,4 +1,8 @@
 import Foundation
+import PathKit
+import TOMLKit
+
+// MARK: Decoding Key
 
 struct StringCodingKey: CodingKey, Equatable {
     var stringValue: String
@@ -10,6 +14,9 @@ struct StringCodingKey: CodingKey, Equatable {
     var intValue: Int? { nil }
     init?(intValue: Int) { nil }
 }
+
+
+// MARK: Dictionary Decoding
 
 extension Dictionary where Key == String, Value == Any {
     init(from decoder: any Decoder) throws {
@@ -85,6 +92,26 @@ extension KeyedDecodingContainer where K == StringCodingKey {
         }
         else {
             throw DecodingError.dataCorruptedError(forKey: key, in: self, debugDescription: "Unsupported data type encountered.")
+        }
+    }
+}
+
+
+// MARK: Path Decoding
+
+extension Path {
+    func decode<T>(_ type: T.Type) throws -> T where T: Decodable {
+        switch self.url.pathExtension {
+        case "toml":
+            let decoder = TOMLDecoder()
+            return try decoder.decode(type, from: self.read())
+            
+        case "json":
+            let decoder = JSONDecoder()
+            return try decoder.decode(type, from: Data(contentsOf: self.url))
+            
+        default:
+            throw UnsupportedConfigurationFileFormat(format: self.url.pathExtension)
         }
     }
 }

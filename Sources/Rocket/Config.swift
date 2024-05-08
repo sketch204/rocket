@@ -25,25 +25,17 @@ struct Config {
     }
 }
 
-
 extension Config {
+    init(path: Path) throws {
+        self = try path.decode(Self.self)
+    }
+    
     static func loadDefault() throws -> Config {
         guard let path = try Path.current.children().first(where: { $0.url.lastPathComponent.hasPrefix(configFileName) }) else {
             return Config()
         }
         
-        switch path.url.pathExtension {
-        case "toml":
-            let decoder = TOMLDecoder()
-            return try decoder.decode(Config.self, from: path.read())
-            
-        case "json":
-            let decoder = JSONDecoder()
-            return try decoder.decode(Config.self, from: Data(contentsOf: path.url))
-            
-        default:
-            throw UnsupportedConfigurationFileFormat(format: path.url.pathExtension)
-        }
+        return try Config(path: path)
     }
 }
 
