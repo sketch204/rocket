@@ -19,7 +19,7 @@ struct Rocket: ParsableCommand {
     mutating func run() throws {
         let config = try Config.loadDefault()
         
-        let articleFileName = "article"
+        let articleFileName = "posts/2023-09-07-how-to-use-tables-in-swiftui"
         let outputDirectoryName = "dist"
         
         let outputDirectory = workingDirectory + Path(outputDirectoryName)
@@ -39,9 +39,11 @@ struct Rocket: ParsableCommand {
             fatalError("Failed to parse string into data")
         }
         
-        let articleOutputUrl = outputDirectory + Path("\(articleFileName).html")
+        let articleOutputPath = outputDirectory + Path("\(articleFileName).html")
         
-        try articleData.write(to: articleOutputUrl.url, options: .atomic)
+        print("About to write to \(articleOutputPath)")
+        
+        try articleData.write(to: articleOutputPath.url, options: .atomic)
         
         print(workingDirectory)
         print(config)
