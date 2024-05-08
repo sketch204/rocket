@@ -1,3 +1,4 @@
+import FrontMatterKit
 import Markdown
 import Stencil
 import PathKit
@@ -21,7 +22,7 @@ public struct HTMLConverter {
     public mutating func generateHTML() throws -> String {
         extractFrontMatter(from: markdown)
         
-        var markdown = removeFrontmatter(from: markdown)
+        var markdown = FrontMatter.removeFrontmatter(from: markdown)
         
         markdown = try inflate(markdown)
         
@@ -35,8 +36,8 @@ public struct HTMLConverter {
     }
     
     private mutating func extractFrontMatter(from markdown: String) {
-        let frontmatter = parseFrontmatter(from: markdown)
-        documentContext.merge(frontmatter, uniquingKeysWith: { $1 })
+        let frontmatter = FrontMatter(from: markdown)
+//        documentContext.merge(frontmatter.dictionary, uniquingKeysWith: { $1 })
     }
     
     private func inflate(_ markdown: String) throws -> String {

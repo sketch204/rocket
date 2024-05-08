@@ -1,5 +1,5 @@
 import XCTest
-@testable import RocketParsing
+@testable import FrontMatterKit
 
 final class FrontmatterParserTests: XCTestCase {
     let sampleMarkdownWithFrontmatter = """
@@ -30,27 +30,27 @@ final class FrontmatterParserTests: XCTestCase {
     """
     
     func test_parseFrontmatter_withFrontmatter() throws {
-        let frontmatter = parseFrontmatter(from: sampleMarkdownWithFrontmatter)
+        let frontMatter = FrontMatter(from: sampleMarkdownWithFrontmatter)
         
-        let expectedFrontmatter = [
-            "title": "From C to Swift - Part 1",
-            "description": "Learn to how to integrate C system libraries into your Swift code",
-            "tags": "swift swiftpm c",
-        ]
+        let expectedTitle = "From C to Swift - Part 1"
+        let expectedDescription = "Learn to how to integrate C system libraries into your Swift code"
+        let expectedTags = "swift swiftpm c"
         
-        XCTAssertEqual(frontmatter, expectedFrontmatter)
+        XCTAssertEqual(frontMatter["title"] as? String, expectedTitle)
+        XCTAssertEqual(frontMatter["description"] as? String, expectedDescription)
+        XCTAssertEqual(frontMatter["tags"] as? String, expectedTags)
     }
     
     func test_parseFrontmatter_withEmptyFrontmatter() throws {
-        let frontmatter = parseFrontmatter(from: sampleMarkdownEmptyFrontmatter)
+        let frontMatter = FrontMatter(from: sampleMarkdownEmptyFrontmatter)
         
-        XCTAssertEqual(frontmatter, [:])
+        XCTAssertTrue(frontMatter.dictionary.isEmpty)
     }
     
     func test_parseFrontmatter_withNoFrontmatter() throws {
-        let frontmatter = parseFrontmatter(from: sampleMarkdownNoFrontmatter)
+        let frontMatter = FrontMatter(from: sampleMarkdownNoFrontmatter)
         
-        XCTAssertEqual(frontmatter, [:])
+        XCTAssertTrue(frontMatter.dictionary.isEmpty)
     }
 }
 

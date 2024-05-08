@@ -38,6 +38,7 @@ let package = Package(
         .target(
             name: "RocketParsing",
             dependencies: [
+                "FrontMatterKit",
                 .product(name: "Markdown", package: "swift-markdown"),
                 .product(name: "Stencil", package: "Stencil"),
             ]
@@ -48,6 +49,16 @@ let package = Package(
                 "RocketParsing",
                 .product(name: "Markdown", package: "swift-markdown"),
                 .product(name: "Stencil", package: "Stencil"),
+            ]
+        ),
+        
+        .target(
+            name: "FrontMatterKit"
+        ),
+        .testTarget(
+            name: "FrontMatterKitTests",
+            dependencies: [
+                "FrontMatterKit"
             ]
         ),
     ]
