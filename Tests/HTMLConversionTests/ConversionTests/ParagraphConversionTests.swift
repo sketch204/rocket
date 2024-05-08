@@ -1,5 +1,5 @@
 import XCTest
-@testable import RocketParsing
+@testable import HTMLConversion
 
 final class ParagraphConversionTests: XCTestCase {
     func test_singleLineParagraph() throws {
@@ -7,8 +7,7 @@ final class ParagraphConversionTests: XCTestCase {
         This is a paragraph
         """
         
-        var converter = HTMLConverter(markdown: markdown)
-        let html = try converter.generateHTML()
+        let html = HTMLConverter.convert(markdown: markdown)
         let expectedHTML = """
         <p>This is a paragraph</p>
         """
@@ -21,8 +20,7 @@ final class ParagraphConversionTests: XCTestCase {
         This is still the same paragraph
         """
         
-        var converter = HTMLConverter(markdown: markdown)
-        let html = try converter.generateHTML()
+        let html = HTMLConverter.convert(markdown: markdown)
         let expectedHTML = """
         <p>This is a paragraph\nThis is still the same paragraph</p>
         """
@@ -37,8 +35,7 @@ final class ParagraphConversionTests: XCTestCase {
         This is a different paragraph
         """
         
-        var converter = HTMLConverter(markdown: markdown)
-        let html = try converter.generateHTML()
+        let html = HTMLConverter.convert(markdown: markdown)
         let expectedHTML = """
         <p>This is a paragraph\nThis is still the same paragraph</p><p>This is a different paragraph</p>
         """

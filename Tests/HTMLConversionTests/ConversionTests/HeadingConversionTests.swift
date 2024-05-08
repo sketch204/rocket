@@ -1,5 +1,5 @@
 import XCTest
-@testable import RocketParsing
+@testable import HTMLConversion
 
 final class HeadingConversionTests: XCTestCase {
     func test_heading1Parsing() throws {
@@ -7,8 +7,7 @@ final class HeadingConversionTests: XCTestCase {
         # Heading
         """
         
-        var converter = HTMLConverter(markdown: markdown)
-        let html = try converter.generateHTML()
+        let html = HTMLConverter.convert(markdown: markdown)
         let expectedHTML = """
         <h1>Heading</h1>
         """
@@ -20,8 +19,7 @@ final class HeadingConversionTests: XCTestCase {
         ## Heading
         """
         
-        var converter = HTMLConverter(markdown: markdown)
-        let html = try converter.generateHTML()
+        let html = HTMLConverter.convert(markdown: markdown)
         let expectedHTML = """
         <h2>Heading</h2>
         """
@@ -33,8 +31,7 @@ final class HeadingConversionTests: XCTestCase {
         ### Heading
         """
         
-        var converter = HTMLConverter(markdown: markdown)
-        let html = try converter.generateHTML()
+        let html = HTMLConverter.convert(markdown: markdown)
         let expectedHTML = """
         <h3>Heading</h3>
         """
@@ -46,8 +43,7 @@ final class HeadingConversionTests: XCTestCase {
         #### Heading
         """
         
-        var converter = HTMLConverter(markdown: markdown)
-        let html = try converter.generateHTML()
+        let html = HTMLConverter.convert(markdown: markdown)
         let expectedHTML = """
         <h4>Heading</h4>
         """
@@ -59,8 +55,7 @@ final class HeadingConversionTests: XCTestCase {
         ##### Heading
         """
         
-        var converter = HTMLConverter(markdown: markdown)
-        let html = try converter.generateHTML()
+        let html = HTMLConverter.convert(markdown: markdown)
         let expectedHTML = """
         <h5>Heading</h5>
         """
@@ -72,8 +67,7 @@ final class HeadingConversionTests: XCTestCase {
         ###### Heading
         """
         
-        var converter = HTMLConverter(markdown: markdown)
-        let html = try converter.generateHTML()
+        let html = HTMLConverter.convert(markdown: markdown)
         let expectedHTML = """
         <h6>Heading</h6>
         """
@@ -85,8 +79,7 @@ final class HeadingConversionTests: XCTestCase {
         ######## Heading
         """
         
-        var converter = HTMLConverter(markdown: markdown)
-        let html = try converter.generateHTML()
+        let html = HTMLConverter.convert(markdown: markdown)
         let expectedHTML = """
         <p>######## Heading</p>
         """
@@ -102,8 +95,7 @@ final class HeadingConversionTests: XCTestCase {
         #### Heading 4
         """
         
-        var converter = HTMLConverter(markdown: markdown)
-        let html = try converter.generateHTML()
+        let html = HTMLConverter.convert(markdown: markdown)
         let expectedHTML = """
         <h1>Heading</h1><h2>Heading 2</h2><h4>Heading 4</h4>
         """

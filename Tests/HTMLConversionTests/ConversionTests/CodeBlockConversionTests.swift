@@ -1,5 +1,5 @@
 import XCTest
-@testable import RocketParsing
+@testable import HTMLConversion
 
 import Markdown
 
@@ -15,8 +15,7 @@ final class CodeBlockConversionTests: XCTestCase {
         ```
         """
         
-        var converter = HTMLConverter(markdown: markdown)
-        let html = try converter.generateHTML()
+        let html = HTMLConverter.convert(markdown: markdown)
         let expectedHTML = """
         <pre><code>module SwiftLibraryName {
             header &quot;bridgingHeaderName&quot;
@@ -43,8 +42,7 @@ final class CodeBlockConversionTests: XCTestCase {
         ```
         """
         
-        var converter = HTMLConverter(markdown: markdown)
-        let html = try converter.generateHTML()
+        let html = HTMLConverter.convert(markdown: markdown)
         let expectedHTML = """
         <pre><code class="language-swift">let package = Package(
             name: &quot;Curses&quot;,
@@ -69,8 +67,7 @@ final class CodeBlockConversionTests: XCTestCase {
         
         print(Document(parsing: markdown, options: []).debugDescription())
         
-        var converter = HTMLConverter(markdown: markdown)
-        let html = try converter.generateHTML()
+        let html = HTMLConverter.convert(markdown: markdown)
         let expectedHTML = """
         <pre><code class="language-c">#include &lt;ncurses.h&gt;
         </code></pre>

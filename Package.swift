@@ -10,8 +10,8 @@ let package = Package(
         .executable(name: "Rocket", targets: ["Rocket"]),
         
         .library(
-            name: "RocketParsing",
-            targets: ["RocketParsing"]
+            name: "HTMLConversion",
+            targets: ["HTMLConversion"]
         ),
     ],
     dependencies: [
@@ -27,7 +27,8 @@ let package = Package(
         .executableTarget(
             name: "Rocket",
             dependencies: [
-                "RocketParsing",
+                "HTMLConversion",
+                "FrontMatterKit",
                 .product(name: "ArgumentParser", package: "swift-argument-parser"),
                 .product(name: "TOMLKit", package: "TOMLKit"),
                 .product(name: "Stencil", package: "Stencil"),
@@ -36,17 +37,16 @@ let package = Package(
         ),
         
         .target(
-            name: "RocketParsing",
+            name: "HTMLConversion",
             dependencies: [
-                "FrontMatterKit",
                 .product(name: "Markdown", package: "swift-markdown"),
                 .product(name: "Stencil", package: "Stencil"),
             ]
         ),
         .testTarget(
-            name: "RocketParsingTests",
+            name: "HTMLConversionTests",
             dependencies: [
-                "RocketParsing",
+                "HTMLConversion",
                 .product(name: "Markdown", package: "swift-markdown"),
                 .product(name: "Stencil", package: "Stencil"),
             ]
