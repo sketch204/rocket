@@ -22,7 +22,7 @@ struct Rocket: ParsableCommand {
         let config = try Config.loadDefault()
         let environment = Environment(
             loader: FileSystemLoader(
-                paths: [ config.templatesPath ]
+                paths: [ config.templatesPath, config.includesPath ]
             ),
             trimBehaviour: .smart
         )

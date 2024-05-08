@@ -4,6 +4,7 @@ import TOMLKit
 
 struct Config {
     let templatesPath: Path
+    let includesPath: Path
     let outputPath: Path
     let assetsPaths: [Path]
     let ignoredPaths: [Path]
@@ -12,12 +13,14 @@ struct Config {
     
     init(
         templatesPath: Path = defaultTemplatesPath,
+        includesPath: Path = defaultIncludesPath,
         outputPath: Path = defaultOutputPath,
         assetsPaths: [Path] = [defaultAssetsPath],
         ignoredPaths: [Path] = [],
         userProperties: [String: Any] = [:]
     ) {
         self.templatesPath = templatesPath
+        self.includesPath = includesPath
         self.outputPath = outputPath
         self.assetsPaths = assetsPaths
         self.ignoredPaths = ignoredPaths
@@ -44,6 +47,7 @@ extension Config {
 
 extension StringCodingKey {
     static var templatesPath: Self { Self(stringValue: "templatesPath") }
+    static var includesPath: Self { Self(stringValue: "includesPath") }
     static var outputPath: Self { Self(stringValue: "outputPath") }
     static var assetsPaths: Self { Self(stringValue: "assetsPaths") }
     static var ignoredPaths: Self { Self(stringValue: "ignoredPaths") }
@@ -55,6 +59,9 @@ extension Config: Decodable {
         
         let templateRelativePath = userProperties.removeValue(forKey: StringCodingKey.templatesPath.stringValue) as? String ?? Self.defaultTemplatesDirectoryName
         templatesPath = .current + Path(templateRelativePath)
+        
+        let includesRelativePath = userProperties.removeValue(forKey: StringCodingKey.includesPath.stringValue) as? String ?? Self.defaultIncludesDirectoryName
+        includesPath = .current + Path(includesRelativePath)
         
         let outputRelativePath = userProperties.removeValue(forKey: StringCodingKey.outputPath.stringValue) as? String ?? Self.defaultOutputDirectoryName
         outputPath = .current + Path(outputRelativePath)
@@ -77,6 +84,9 @@ extension Config {
     
     static let defaultTemplatesDirectoryName = "templates"
     static var defaultTemplatesPath: Path { .current + Path(defaultTemplatesDirectoryName) }
+    
+    static let defaultIncludesDirectoryName = "includes"
+    static var defaultIncludesPath: Path { .current + Path(defaultIncludesDirectoryName) }
     
     static let defaultOutputDirectoryName = "dist"
     static var defaultOutputPath: Path { .current + Path(defaultOutputDirectoryName) }
