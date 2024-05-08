@@ -8,16 +8,20 @@ struct Config {
     let assetsPaths: [Path]
     let ignoredPaths: [Path]
     
+    let userProperties: [String: Any]
+    
     init(
         templatesPath: Path = defaultTemplatesPath,
         outputPath: Path = defaultOutputPath,
         assetsPaths: [Path] = [defaultAssetsPath],
-        ignoredPaths: [Path] = []
+        ignoredPaths: [Path] = [],
+        userProperties: [String: Any] = [:]
     ) {
         self.templatesPath = templatesPath
         self.outputPath = outputPath
         self.assetsPaths = assetsPaths
         self.ignoredPaths = ignoredPaths
+        self.userProperties = userProperties
     }
 }
 
@@ -46,28 +50,30 @@ extension Config {
 
 // MARK: Decoding
 
+extension StringCodingKey {
+    static var templatesPath: Self { Self(stringValue: "templatesPath") }
+    static var outputPath: Self { Self(stringValue: "outputPath") }
+    static var assetsPaths: Self { Self(stringValue: "assetsPaths") }
+    static var ignoredPaths: Self { Self(stringValue: "ignoredPaths") }
+}
+
 extension Config: Decodable {
-    enum CodingKeys: String, CodingKey {
-        case templatesPath
-        case outputPath
-        case assetsPaths
-        case ignoredPaths
-    }
-    
     init(from decoder: any Decoder) throws {
-        let container = try decoder.container(keyedBy: CodingKeys.self)
+        var userProperties = try Dictionary(from: decoder)
         
-        let templateRelativePath = try container.decodeIfPresent(String.self, forKey: .templatesPath) ?? Self.defaultTemplatesDirectoryName
-        self.templatesPath = .current + Path(templateRelativePath)
+        let templateRelativePath = userProperties.removeValue(forKey: StringCodingKey.templatesPath.stringValue) as? String ?? Self.defaultTemplatesDirectoryName
+        templatesPath = .current + Path(templateRelativePath)
         
-        let outputRelativePath = try container.decodeIfPresent(String.self, forKey: .outputPath) ?? Self.defaultOutputDirectoryName
-        self.outputPath = .current + Path(outputRelativePath)
+        let outputRelativePath = userProperties.removeValue(forKey: StringCodingKey.outputPath.stringValue) as? String ?? Self.defaultOutputDirectoryName
+        outputPath = .current + Path(outputRelativePath)
         
-        let assetsRelativePaths = try container.decodeIfPresent([String].self, forKey: .assetsPaths) ?? [Self.defaultOutputDirectoryName]
-        self.assetsPaths = assetsRelativePaths.map { .current + Path($0) }
+        let assetsRelativePaths = userProperties.removeValue(forKey: StringCodingKey.assetsPaths.stringValue) as? [String] ?? [Self.defaultAssetsDirectoryName]
+        assetsPaths = assetsRelativePaths.map { .current + Path($0) }
         
-        let ignoredRelativePaths = try container.decodeIfPresent([String].self, forKey: .ignoredPaths) ?? []
-        self.ignoredPaths = ignoredRelativePaths.map { .current + Path($0) }
+        let ignoredRelativePaths = userProperties.removeValue(forKey: StringCodingKey.ignoredPaths.stringValue) as? [String] ?? []
+        ignoredPaths = ignoredRelativePaths.map { .current + Path($0) }
+        
+        self.userProperties = userProperties
     }
 }
 
