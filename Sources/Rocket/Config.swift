@@ -3,6 +3,8 @@ import PathKit
 import TOMLKit
 
 struct Config {
+    let postsPath: Path
+    
     let templatesPath: Path
     let includesPath: Path
     let outputPath: Path
@@ -12,6 +14,7 @@ struct Config {
     let userProperties: [String: Any]
     
     init(
+        postsPath: Path = defaultPostsPath,
         templatesPath: Path = defaultTemplatesPath,
         includesPath: Path = defaultIncludesPath,
         outputPath: Path = defaultOutputPath,
@@ -19,6 +22,8 @@ struct Config {
         ignoredPaths: [Path] = [],
         userProperties: [String: Any] = [:]
     ) {
+        self.postsPath = postsPath
+        
         self.templatesPath = templatesPath
         self.includesPath = includesPath
         self.outputPath = outputPath
@@ -46,16 +51,20 @@ extension Config {
 // MARK: Decoding
 
 extension StringCodingKey {
-    static var templatesPath: Self { Self(stringValue: "templatesPath") }
-    static var includesPath: Self { Self(stringValue: "includesPath") }
-    static var outputPath: Self { Self(stringValue: "outputPath") }
-    static var assetsPaths: Self { Self(stringValue: "assetsPaths") }
-    static var ignoredPaths: Self { Self(stringValue: "ignoredPaths") }
+    static let postsPath = Self(stringValue: "postsPath")
+    static let templatesPath = Self(stringValue: "templatesPath")
+    static let includesPath = Self(stringValue: "includesPath")
+    static let outputPath = Self(stringValue: "outputPath")
+    static let assetsPaths = Self(stringValue: "assetsPaths")
+    static let ignoredPaths = Self(stringValue: "ignoredPaths")
 }
 
 extension Config: Decodable {
     init(from decoder: any Decoder) throws {
         var userProperties = try Dictionary(from: decoder)
+        
+        let postsRelativePath = userProperties.removeValue(forKey: StringCodingKey.postsPath.stringValue) as? String ?? Self.defaultPostsDirectoryName
+        postsPath = .current + Path(postsRelativePath)
         
         let templateRelativePath = userProperties.removeValue(forKey: StringCodingKey.templatesPath.stringValue) as? String ?? Self.defaultTemplatesDirectoryName
         templatesPath = .current + Path(templateRelativePath)
@@ -81,6 +90,9 @@ extension Config: Decodable {
 
 extension Config {
     static let configFileName = "rocket"
+    
+    static let defaultPostsDirectoryName = "posts"
+    static var defaultPostsPath: Path { .current + Path(defaultPostsDirectoryName) }
     
     static let defaultTemplatesDirectoryName = "templates"
     static var defaultTemplatesPath: Path { .current + Path(defaultTemplatesDirectoryName) }
