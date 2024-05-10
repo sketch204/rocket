@@ -11,6 +11,8 @@ struct Config {
     let assetsPaths: [Path]
     let ignoredPaths: [Path]
     
+    let baseURL: String
+    
     let userProperties: [String: Any]
     
     init(
@@ -20,6 +22,7 @@ struct Config {
         outputPath: Path = defaultOutputPath,
         assetsPaths: [Path] = [defaultAssetsPath],
         ignoredPaths: [Path] = [],
+        baseURL: String = "",
         userProperties: [String: Any] = [:]
     ) {
         self.postsPath = postsPath
@@ -29,6 +32,7 @@ struct Config {
         self.outputPath = outputPath
         self.assetsPaths = assetsPaths
         self.ignoredPaths = ignoredPaths
+        self.baseURL = baseURL
         self.userProperties = userProperties
     }
 }
@@ -57,6 +61,7 @@ extension StringCodingKey {
     static let outputPath = Self(stringValue: "outputPath")
     static let assetsPaths = Self(stringValue: "assetsPaths")
     static let ignoredPaths = Self(stringValue: "ignoredPaths")
+    static let baseURL = Self(stringValue: "baseURL")
 }
 
 extension Config: Decodable {
@@ -80,6 +85,12 @@ extension Config: Decodable {
         
         let ignoredRelativePaths = userProperties.removeValue(forKey: StringCodingKey.ignoredPaths.stringValue) as? [String] ?? []
         ignoredPaths = ignoredRelativePaths.map { .current + Path($0) }
+        
+        var baseURL = userProperties.removeValue(forKey: StringCodingKey.baseURL.stringValue) as? String ?? ""
+        if baseURL.hasSuffix("/") {
+            baseURL.removeLast()
+        }
+        self.baseURL = baseURL
         
         self.userProperties = userProperties
     }
