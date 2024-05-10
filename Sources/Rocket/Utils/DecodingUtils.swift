@@ -52,7 +52,10 @@ extension Array where Element == Any {
 
 extension UnkeyedDecodingContainer {
     fileprivate mutating func supportedValue() throws -> Any {
-        if let number = try? self.decode(Double.self) {
+        if let date = try? self.decode(Date.self) {
+            return date
+        }
+        else if let number = try? self.decode(Double.self) {
             return number
         }
         else if let objectContainer = try? self.nestedContainer(keyedBy: StringCodingKey.self) {
@@ -63,9 +66,6 @@ extension UnkeyedDecodingContainer {
         }
         else if let string = try? self.decode(String.self) {
             return string
-        }
-        else if let date = try? self.decode(Date.self) {
-            return date
         }
         else {
             throw DecodingError.dataCorruptedError(in: self, debugDescription: "Unsupported data type encountered.")
