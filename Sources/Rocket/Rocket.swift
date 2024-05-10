@@ -130,14 +130,16 @@ extension Rocket {
         try outputPath.write(pageContents, encoding: .utf8)
     }
     
-    func parsePage(
+    private func parsePage(
         _ pageContents: String,
         context: Context,
         environment: Environment
     ) throws -> String {
         let pageContents = FrontMatter.removeFrontmatter(from: pageContents)
         
-        let pageTemplate = Template(templateString: pageContents, environment: environment)
+        let templatedString = insertTemplateTags(to: pageContents, context: context)
+        
+        let pageTemplate = Template(templateString: templatedString, environment: environment)
         let inflatedPageContents = try pageTemplate.render(
             Stencil.Context(
                 dictionary: context.dictionary,
@@ -146,5 +148,25 @@ extension Rocket {
         )
         
         return inflatedPageContents
+    }
+    
+    private func insertTemplateTags(to contents: String, context: Context) -> String {
+        if let pageContext = context["page"] as? [String: Any], var layoutName = pageContext["layout"] as? String {
+            let layoutBlockName = pageContext["layoutBlockName"] as? String ?? "content"
+            
+            if !layoutName.contains(".") {
+                layoutName = "\(layoutName).html"
+            }
+            
+            return """
+            {% extends "\(layoutName)" %}
+            {% block \(layoutBlockName) %}
+            \(contents)
+            {% endblock %}
+            """
+        }
+        else {
+            return contents
+        }
     }
 }
