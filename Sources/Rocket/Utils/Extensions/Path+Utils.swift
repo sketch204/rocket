@@ -1,5 +1,6 @@
 import Foundation
 import PathKit
+import Stencil
 
 // MARK: Standard Paths
 
@@ -86,6 +87,19 @@ extension Path {
     }
 }
 
+extension Path {
+    func relative(to parentPath: Path = .current, includeLeadingSlash: Bool = true) -> Path {
+        var relativePath = String(self.string.trimmingPrefix(parentPath.string))
+        if includeLeadingSlash && !relativePath.hasPrefix("/") {
+            relativePath = "/\(relativePath)"
+        }
+        if !includeLeadingSlash && relativePath.hasPrefix("/") {
+            relativePath.removeFirst()
+        }
+        return Path(relativePath)
+    }
+}
+
 
 // MARK: File Metadata
 
@@ -126,5 +140,14 @@ extension Path.FileMetadata {
             dateCreated: Date(timeIntervalSince1970: Double(stat.st_birthtimespec.tv_sec)),
             size: stat.st_size
         )
+    }
+}
+
+
+// MARK: Stencil
+
+extension Path: Resolvable {
+    public func resolve(_ context: Stencil.Context) throws -> Any? {
+        string
     }
 }

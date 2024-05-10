@@ -78,29 +78,24 @@ struct Rocket: ParsableCommand {
     }
     
     private func copyAssetPath(_ path: Path, config: Config) throws {
-        var relativePath = String(path.string.trimmingPrefix(Path.current.string))
-        if relativePath.hasPrefix("/") {
-            relativePath = String(relativePath.dropFirst())
-        }
-        let destinationPath = config.outputPath + relativePath
+        let destinationPath = config.outputPath + path.relative(includeLeadingSlash: false)
+        
+        print("Copying asset at \(path)... ", terminator: "")
         
         try destinationPath.parent().normalize().mkpath()
         
         if destinationPath.exists {
-//            print("Asset file already exists at \(destinationPath)")
             let isModified = try destinationPath.metadata.dateStatusChanged < path.metadata.dateModified
             
             if isModified {
-//                print("Existing file is outdated, deleting")
                 try destinationPath.delete()
             } else {
-//                print("Existing file is not outdated, aborting copy")
+                print("❌ Aborting, file already exists!")
                 return
             }
-            
-//            print("\(destinationPath): \(isModified ? "✅ \(try path.metadata) \(try destinationPath.metadata)" : "❌")")
         }
         try path.copy(destinationPath.normalize())
+        print("✅ Copied to \(destinationPath)!")
     }
 }
 
@@ -108,7 +103,7 @@ struct Rocket: ParsableCommand {
 extension Rocket {
     func processPage(context: Context, globalContext: Context, environment: Environment) throws {
         guard let inputPath = context[.inputPath] as? Path,
-              let outputPath = context[.outputPath] as? Path
+              let outputPath = context[.absoluteOutputPath] as? Path
         else { throw InvalidContext(localizedDescription: "Input or output paths missing") }
         
         print("Processing file at \(inputPath)")

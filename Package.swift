@@ -35,6 +35,12 @@ let package = Package(
                 .product(name: "PathKit", package: "PathKit"),
             ]
         ),
+        .testTarget(
+            name: "RocketTests",
+            dependencies: [
+                "Rocket",
+            ]
+        ),
         
         .target(
             name: "HTMLConversion",

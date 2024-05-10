@@ -86,13 +86,13 @@ extension Context {
         output.merge(with: page(try path.read()))
         output[.inputPath] = path
         
-        var relativePath = String(path.string.trimmingPrefix(Path.current.string))
-        if relativePath.hasPrefix("/") {
-            relativePath = String(relativePath.dropFirst())
-        }
-        let destinationPath = config.outputPath + relativePath
+        let outputPath = outputPath(for: path, config: config)
         
-        output[.outputPath] = (destinationPath.parent() + "\(destinationPath.lastComponentWithoutExtension).html").normalize()
+        output[.absoluteOutputPath] = outputPath
+        output[.outputPath] = outputPath.relative(to: config.outputPath)
+        output[.filename] = outputPath.lastComponent
+        output[.filenameWithoutExtension] = outputPath.lastComponentWithoutExtension
+        
         return output
     }
     
@@ -106,6 +106,16 @@ extension Context {
             return Context()
         }
         return Context(dictionary: values)
+    }
+    
+    private static func outputPath(for path: Path, config: Config) -> Path {
+        var relativePath = String(path.string.trimmingPrefix(Path.current.string))
+        if relativePath.hasPrefix("/") {
+            relativePath = String(relativePath.dropFirst())
+        }
+        let destinationPath = config.outputPath + relativePath
+        
+        return (destinationPath.parent() + "\(destinationPath.lastComponentWithoutExtension).html").normalize()
     }
 }
 
@@ -128,11 +138,10 @@ extension Context {
 }
 
 extension Context.Key {
-    static let title = Self(rawValue: "title")
-    static let description = Self(rawValue: "description")
-    static let excerpt = Self(rawValue: "excerpt")
-    static let tags = Self(rawValue: "tags")
-    static let date = Self(rawValue: "date")
     static let inputPath = Self(rawValue: "inputPath")
+    static let absoluteOutputPath = Self(rawValue: "absoluteOutputPath")
+    
     static let outputPath = Self(rawValue: "outputPath")
+    static let filename = Self(rawValue: "filename")
+    static let filenameWithoutExtension = Self(rawValue: "filenameWithoutExtension")
 }
