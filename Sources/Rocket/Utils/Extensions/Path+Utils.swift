@@ -23,6 +23,7 @@ extension Path {
         Path.current.iterateChildren(options: [.skipsPackageDescendants, .skipsHiddenFiles])
             .filter { path in
                 !path.isIgnored(config: config)
+                && !path.isInOutputPath(config: config)
                 && !path.isInTemplatesPath(config: config)
                 && !path.isInIncludesPath(config: config)
                 && Set(arrayLiteral: "json", "toml", "yaml", "yml").contains(path.extension?.lowercased())
@@ -33,6 +34,7 @@ extension Path {
         Path.current.iterateChildren(options: [.skipsPackageDescendants, .skipsHiddenFiles])
             .filter { path in
                 !path.isIgnored(config: config)
+                && !path.isInOutputPath(config: config)
                 && !path.isInTemplatesPath(config: config)
                 && !path.isInIncludesPath(config: config)
                 && Set(arrayLiteral: "html", "md").contains(path.extension?.lowercased())
