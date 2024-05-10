@@ -150,8 +150,10 @@ extension Rocket {
     }
     
     private func insertTemplateTags(to contents: String, context: Context) -> String {
-        if let pageContext = context["page"] as? [String: Any], var layoutName = pageContext["layout"] as? String {
-            let layoutBlockName = pageContext["layoutBlockName"] as? String ?? "content"
+        if let pageContext = context.context(.page), 
+            var layoutName = pageContext[.layout] as? String
+        {
+            let layoutBlockName = pageContext[.layoutBlockName] as? String ?? "content"
             
             if !layoutName.contains(".") {
                 layoutName = "\(layoutName).html"

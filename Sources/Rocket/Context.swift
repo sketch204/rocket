@@ -25,6 +25,15 @@ extension Context {
         get { self[key.rawValue] }
         set { self[key.rawValue] = newValue }
     }
+    
+    func context(_ key: String) -> Context? {
+        guard let dictionary = self[key] as? [String: Any] else { return nil }
+        return Context(dictionary: dictionary)
+    }
+    
+    func context(_ key: Key) -> Context? {
+        context(key.rawValue)
+    }
 }
 
 extension Context {
@@ -101,7 +110,7 @@ extension Context {
         return Self(frontMatter: frontMatter)
     }
     
-    private static func defaults(for path: Path, config: Config) -> Context {
+    static func defaults(for path: Path, config: Config) -> Context {
         guard let values = config.defaults.first(where: { path.matchesDirectory($0.path) })?.values else {
             return Context()
         }
@@ -138,10 +147,15 @@ extension Context {
 }
 
 extension Context.Key {
+    static let page = Self(rawValue: "page")
+    
     static let inputPath = Self(rawValue: "inputPath")
     static let absoluteOutputPath = Self(rawValue: "absoluteOutputPath")
     
     static let outputPath = Self(rawValue: "outputPath")
     static let filename = Self(rawValue: "filename")
     static let filenameWithoutExtension = Self(rawValue: "filenameWithoutExtension")
+    
+    static let layout = Self(rawValue: "layout")
+    static let layoutBlockName = Self(rawValue: "layoutBlockName")
 }
