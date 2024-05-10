@@ -13,6 +13,8 @@ struct Config {
     
     let baseURL: String
     
+    let defaults: [Defaults]
+    
     let userProperties: [String: Any]
     
     init(
@@ -23,6 +25,7 @@ struct Config {
         assetsPaths: [Path] = [defaultAssetsPath],
         ignoredPaths: [Path] = [],
         baseURL: String = "",
+        defaults: [Defaults] = [],
         userProperties: [String: Any] = [:]
     ) {
         self.postsPath = postsPath
@@ -33,6 +36,7 @@ struct Config {
         self.assetsPaths = assetsPaths
         self.ignoredPaths = ignoredPaths
         self.baseURL = baseURL
+        self.defaults = defaults
         self.userProperties = userProperties
     }
 }
@@ -61,6 +65,7 @@ extension StringCodingKey {
     static let outputPath = Self(stringValue: "outputPath")
     static let assetsPaths = Self(stringValue: "assetsPaths")
     static let ignoredPaths = Self(stringValue: "ignoredPaths")
+    static let defaults = Self(stringValue: "defaults")
     static let baseURL = Self(stringValue: "baseURL")
 }
 
@@ -91,6 +96,9 @@ extension Config: Decodable {
             baseURL.removeLast()
         }
         self.baseURL = baseURL
+        
+        let defaults = userProperties.removeValue(forKey: StringCodingKey.defaults.stringValue) as? [[String: Any]] ?? []
+        self.defaults = defaults.compactMap(Defaults.init(from:))
         
         self.userProperties = userProperties
     }

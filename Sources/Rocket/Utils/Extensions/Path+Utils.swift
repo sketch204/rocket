@@ -56,29 +56,33 @@ extension Path {
     }
     
     func isInOutputPath(config: Config) -> Bool {
-        self.match("\(config.outputPath.string)/*")
+        matchesDirectory(config.outputPath)
     }
     
     func isInTemplatesPath(config: Config) -> Bool {
-        self.match("\(config.templatesPath.string)/*")
+        matchesDirectory(config.templatesPath)
     }
     
     func isInIncludesPath(config: Config) -> Bool {
-        self.match("\(config.includesPath.string)/*")
+        matchesDirectory(config.includesPath)
     }
     
     func isInPostsPath(config: Config) -> Bool {
-        self.match("\(config.postsPath)/*")
+        matchesDirectory(config.postsPath)
     }
     
     func isIgnored(config: Config) -> Bool {
         config.ignoredPaths.contains { ignoredPath in
             if ignoredPath.isDirectory {
-                self.match("\(ignoredPath.string)/*")
+                matchesDirectory(ignoredPath)
             } else {
                 ignoredPath ~= self
             }
         }
+    }
+    
+    func matchesDirectory(_ path: Path) -> Bool {
+        self.match("\(path.string)/*")
     }
 }
 

@@ -111,6 +111,8 @@ extension Rocket {
               let outputPath = context[.outputPath] as? Path
         else { throw InvalidContext(localizedDescription: "Input or output paths missing") }
         
+        print("Processing file at \(inputPath)")
+        
         var pageContext = globalContext
         pageContext["page"] = context.dictionary
         

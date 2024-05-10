@@ -81,7 +81,9 @@ extension Context {
     }
     
     static func page(at path: Path, config: Config) throws -> Self {
-        var output = page(try path.read())
+        var output = self.defaults(for: path, config: config)
+        
+        output.merge(with: page(try path.read()))
         output[.inputPath] = path
         
         var relativePath = String(path.string.trimmingPrefix(Path.current.string))
@@ -97,6 +99,13 @@ extension Context {
     static func page(_ contents: String) -> Self {
         let frontMatter = FrontMatter(from: contents)
         return Self(frontMatter: frontMatter)
+    }
+    
+    private static func defaults(for path: Path, config: Config) -> Context {
+        guard let values = config.defaults.first(where: { path.matchesDirectory($0.path) })?.values else {
+            return Context()
+        }
+        return Context(dictionary: values)
     }
 }
 
