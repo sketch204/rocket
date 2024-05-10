@@ -35,12 +35,7 @@ struct Rocket: ParsableCommand {
         
         
         let config = try Config.loadDefault()
-        let environment = Environment(
-            loader: FileSystemLoader(
-                paths: [ config.templatesPath, config.includesPath ]
-            ),
-            trimBehaviour: .smart
-        )
+        let environment = createEnvironment(config: config)
         let globalContext = try Context.global(config: config)
         
         try copyAssets(config: config)
@@ -52,6 +47,18 @@ struct Rocket: ParsableCommand {
             
             try processPage(context: context, globalContext: globalContext, environment: environment)
         }
+    }
+    
+    private func createEnvironment(config: Config) -> Environment {
+        Environment(
+            loader: FileSystemLoader(
+                paths: [ config.templatesPath, config.includesPath ]
+            ),
+            extensions: [
+                SiteURL.makeExtension(with : config)
+            ],
+            trimBehaviour: .smart
+        )
     }
     
     private func copyAssets(config: Config) throws {
