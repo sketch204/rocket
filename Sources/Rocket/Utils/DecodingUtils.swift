@@ -111,7 +111,7 @@ extension Path {
             return try decoder.decode(type, from: Data(contentsOf: self.url))
             
         default:
-            throw UnsupportedConfigurationFileFormat(format: self.url.pathExtension)
+            throw UnsupportedConfigurationFileFormat(format: self.url.pathExtension, path: description)
         }
     }
 }
