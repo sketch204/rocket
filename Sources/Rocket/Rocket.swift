@@ -55,7 +55,9 @@ struct Rocket: ParsableCommand {
                 paths: [ config.templatesPath, config.includesPath ]
             ),
             extensions: [
-                SiteURL.makeExtension(with : config)
+                SiteURL.makeExtension(with : config),
+                Append.makeExtension(),
+                Prepend.makeExtension(),
             ],
             trimBehaviour: .smart
         )
