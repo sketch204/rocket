@@ -1,3 +1,4 @@
+import DecodingUtils
 import FrontMatterKit
 import PathKit
 

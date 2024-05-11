@@ -29,6 +29,7 @@ let package = Package(
             dependencies: [
                 "HTMLConversion",
                 "FrontMatterKit",
+                "DecodingUtils",
                 .product(name: "ArgumentParser", package: "swift-argument-parser"),
                 .product(name: "TOMLKit", package: "TOMLKit"),
                 .product(name: "Stencil", package: "Stencil"),
@@ -64,7 +65,14 @@ let package = Package(
         .testTarget(
             name: "FrontMatterKitTests",
             dependencies: [
-                "FrontMatterKit"
+                "FrontMatterKit",
+            ]
+        ),
+        
+        .target(
+            name: "DecodingUtils",
+            dependencies: [
+                .product(name: "TOMLKit", package: "TOMLKit"),
             ]
         ),
     ]

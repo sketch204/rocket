@@ -1,6 +1,7 @@
 import Foundation
 import PathKit
 import Stencil
+import TOMLKit
 
 // MARK: Standard Paths
 
@@ -149,5 +150,25 @@ extension Path.FileMetadata {
 extension Path: Resolvable {
     public func resolve(_ context: Stencil.Context) throws -> Any? {
         string
+    }
+}
+
+
+// MARK: Path Decoding
+
+extension Path {
+    public func decode<T>(_ type: T.Type) throws -> T where T: Decodable {
+        switch self.url.pathExtension {
+        case "toml":
+            let decoder = TOMLDecoder()
+            return try decoder.decode(type, from: self.read())
+            
+        case "json":
+            let decoder = JSONDecoder()
+            return try decoder.decode(type, from: Data(contentsOf: self.url))
+            
+        default:
+            throw UnsupportedConfigurationFileFormat(format: self.url.pathExtension, path: description)
+        }
     }
 }
