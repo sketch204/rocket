@@ -102,7 +102,7 @@ extension Rocket {
     func processPage(context: Context, globalContext: Context, environment: Environment) throws {
         guard let inputPath = context[.inputPath] as? Path,
               let outputPath = context[.absoluteOutputPath] as? Path
-        else { throw InvalidContext(localizedDescription: "Input or output paths missing") }
+        else { throw InvalidContext(description: "Input or output paths missing") }
         
         print("Processing file at \(inputPath)")
         
