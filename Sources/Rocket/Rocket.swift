@@ -54,11 +54,7 @@ struct Rocket: ParsableCommand {
             loader: FileSystemLoader(
                 paths: [ config.templatesPath, config.includesPath ]
             ),
-            extensions: [
-                SiteURL.makeExtension(with : config),
-                Append.makeExtension(),
-                Prepend.makeExtension(),
-            ],
+            extensions: CustomFilters.extensions(config: config),
             trimBehaviour: .smart
         )
     }
