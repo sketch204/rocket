@@ -3,11 +3,11 @@ import XCTest
 
 final class FrontmatterParserTests: XCTestCase {
     let sampleMarkdownWithFrontmatter = """
-    ---
+    +++
     title: From C to Swift - Part 1
     description: Learn to how to integrate C system libraries into your Swift code
     tags: swift swiftpm c
-    ---
+    +++
     
     # Creating Tables
     
@@ -15,8 +15,8 @@ final class FrontmatterParserTests: XCTestCase {
     """
     
     let sampleMarkdownEmptyFrontmatter = """
-    ---
-    ---
+    +++
+    +++
     
     # Creating Tables
     
@@ -30,7 +30,7 @@ final class FrontmatterParserTests: XCTestCase {
     """
     
     func test_parseFrontmatter_withFrontmatter() throws {
-        let frontMatter = FrontMatter(from: sampleMarkdownWithFrontmatter)
+        let frontMatter = try FrontMatter(from: sampleMarkdownWithFrontmatter)
         
         let expectedTitle = "From C to Swift - Part 1"
         let expectedDescription = "Learn to how to integrate C system libraries into your Swift code"
@@ -42,13 +42,13 @@ final class FrontmatterParserTests: XCTestCase {
     }
     
     func test_parseFrontmatter_withEmptyFrontmatter() throws {
-        let frontMatter = FrontMatter(from: sampleMarkdownEmptyFrontmatter)
+        let frontMatter = try FrontMatter(from: sampleMarkdownEmptyFrontmatter)
         
         XCTAssertTrue(frontMatter.dictionary.isEmpty)
     }
     
     func test_parseFrontmatter_withNoFrontmatter() throws {
-        let frontMatter = FrontMatter(from: sampleMarkdownNoFrontmatter)
+        let frontMatter =  try FrontMatter(from: sampleMarkdownNoFrontmatter)
         
         XCTAssertTrue(frontMatter.dictionary.isEmpty)
     }

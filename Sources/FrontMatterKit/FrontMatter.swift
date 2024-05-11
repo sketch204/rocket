@@ -1,5 +1,7 @@
+import DecodingUtils
 import Foundation
 import RegexBuilder
+import TOMLKit
 
 public struct FrontMatter {
     public let dictionary: [String: Any]
@@ -15,7 +17,7 @@ extension FrontMatter {
     fileprivate static let frontmatterRegex = Regex {
         Anchor.startOfSubject
         
-        "---"
+        "+++"
         
         CharacterClass.newlineSequence
         
@@ -25,38 +27,31 @@ extension FrontMatter {
             }
         }
         
-        "---"
+        "+++"
         
         Optionally(CharacterClass.newlineSequence)
     }
 }
 
 extension FrontMatter {
-    public init(from markdown: String) {
+    struct ArgumentContainer: Decodable {
+        let arguments: [String: Any]
+        
+        init(from decoder: any Decoder) throws {
+            self.arguments = try Dictionary(from: decoder)
+        }
+    }
+    
+    public init(from markdown: String) throws {
         if let match = markdown.prefixMatch(of: Self.frontmatterRegex) {
-            
             let argumentText = String(match[Self.argumentTextRef])
             
-            self.dictionary = argumentText.split(separator: .newlineSequence)
-                .map(String.init)
-                .compactMap(Self.parseArgumentLineIntoPair)
-                .reduce(into: [String: String]()) { output, pair in
-                    output[pair.key] = pair.value
-                }
+            let arguments = try TOMLDecoder().decode(ArgumentContainer.self, from: argumentText)
+            
+            self.dictionary = arguments.arguments
         } else {
             self.dictionary = [:]
         }
-    }
-
-    fileprivate static func parseArgumentLineIntoPair(_ line: String) -> (key: String, value: String)? {
-        let argComponents = line.split(separator: ":", maxSplits: 1)
-        
-        guard argComponents.count == 2 else { return nil }
-        
-        return (
-            argComponents.first!.trimmingCharacters(in: .whitespaces),
-            argComponents.last!.trimmingCharacters(in: .whitespaces)
-        )
     }
 
     public static func removeFrontmatter(from markdown: String) -> String {

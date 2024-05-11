@@ -56,6 +56,7 @@ extension Context {
 
 extension Context {
     static func global(config: Config) throws -> Self {
+        print("Assembling global context")
         let dataContexts: [String: Any] = try allDataContexts(config: config)
             .mapValues(\.dictionary)
         let postsContext: [String: Any] = [
@@ -91,9 +92,10 @@ extension Context {
     }
     
     static func page(at path: Path, config: Config) throws -> Self {
+        print("Assmebling context for page at \(path)")
         var output = self.defaults(for: path, config: config)
         
-        output.merge(with: page(try path.read()))
+        output.merge(with: try page(path.read()))
         output[.inputPath] = path
         
         let outputPath = outputPath(for: path, config: config)
@@ -106,8 +108,8 @@ extension Context {
         return output
     }
     
-    static func page(_ contents: String) -> Self {
-        let frontMatter = FrontMatter(from: contents)
+    static func page(_ contents: String) throws -> Self {
+        let frontMatter = try FrontMatter(from: contents)
         return Self(frontMatter: frontMatter)
     }
     

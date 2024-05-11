@@ -60,7 +60,11 @@ let package = Package(
         ),
         
         .target(
-            name: "FrontMatterKit"
+            name: "FrontMatterKit",
+            dependencies: [
+                "DecodingUtils",
+                .product(name: "TOMLKit", package: "TOMLKit"),
+            ]
         ),
         .testTarget(
             name: "FrontMatterKitTests",
