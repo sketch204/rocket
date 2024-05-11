@@ -30,11 +30,20 @@ extension Context {
     
     func context(_ key: String) -> Context? {
         guard let dictionary = self[key] as? [String: Any] else { return nil }
-        return Context(dictionary: dictionary)
+        return Self(dictionary: dictionary)
     }
     
     func context(_ key: Key) -> Context? {
         context(key.rawValue)
+    }
+    
+    func contexts(_ key: String) -> [Context]? {
+        guard let array = self[key] as? [[String: Any]] else { return nil }
+        return array.map(Self.init(dictionary:))
+    }
+    
+    func contexts(_ key: Key) -> [Context]? {
+        contexts(key.rawValue)
     }
 }
 
@@ -61,7 +70,7 @@ extension Context {
         let dataContexts: [String: Any] = try allDataContexts(config: config)
             .mapValues(\.dictionary)
         let postsContext: [String: Any] = [
-            "posts": try posts(config: config).map(\.dictionary)
+            Key.posts.rawValue: try posts(config: config).map(\.dictionary)
         ]
         
         return Context(
@@ -110,11 +119,7 @@ extension Context {
 // MARK: Page
 
 extension Context {
-    init(frontMatter: FrontMatter) {
-        self.init(dictionary: frontMatter.dictionary)
-    }
-    
-    static func page(at path: Path, config: Config) throws -> Self {
+    static func page(at path: Path, config: Config, postContexts: [Context] = []) throws -> Self {
         print("Assmebling context for page at \(path)")
         var output = self.defaults(for: path, config: config)
         
@@ -128,12 +133,23 @@ extension Context {
         output[.filename] = outputPath.lastComponent
         output[.filenameWithoutExtension] = outputPath.lastComponentWithoutExtension
         
+        if let nextPost = nextPost(for: path, in: postContexts) {
+            output[.next] = nextPost.dictionary
+        }
+        if let previousPost = previousPost(for: path, in: postContexts) {
+            output[.previous] = previousPost.dictionary
+        }
+        
         return output
     }
     
     static func page(_ contents: String) throws -> Self {
         let frontMatter = try FrontMatter(from: contents)
         return Self(frontMatter: frontMatter)
+    }
+    
+    init(frontMatter: FrontMatter) {
+        self.init(dictionary: frontMatter.dictionary)
     }
     
     static func defaults(for path: Path, config: Config) -> Context {
@@ -151,6 +167,24 @@ extension Context {
         let destinationPath = config.outputPath + relativePath
         
         return (destinationPath.parent() + "\(destinationPath.lastComponentWithoutExtension).html").normalize()
+    }
+    
+    private static func nextPost(for path: Path, in postContexts: [Context]) -> Context? {
+        guard let index = postContexts.firstIndex(where: { ($0[.inputPath] as? Path) == path }),
+              postContexts.indices.contains(index + 1)
+        else {
+            return nil
+        }
+        return postContexts[index + 1]
+    }
+    
+    private static func previousPost(for path: Path, in postContexts: [Context]) -> Context? {
+        guard let index = postContexts.firstIndex(where: { ($0[.inputPath] as? Path) == path }),
+              postContexts.indices.contains(index - 1)
+        else {
+            return nil
+        }
+        return postContexts[index - 1]
     }
 }
 
@@ -173,6 +207,7 @@ extension Context {
 }
 
 extension Context.Key {
+    static let posts = Self(rawValue: "posts")
     static let page = Self(rawValue: "page")
     
     static let inputPath = Self(rawValue: "inputPath")
@@ -181,6 +216,9 @@ extension Context.Key {
     static let outputPath = Self(rawValue: "outputPath")
     static let filename = Self(rawValue: "filename")
     static let filenameWithoutExtension = Self(rawValue: "filenameWithoutExtension")
+    
+    static let next = Self(rawValue: "next")
+    static let previous = Self(rawValue: "previous")
     
     static let layout = Self(rawValue: "layout")
     static let layoutBlockName = Self(rawValue: "layoutBlockName")

@@ -14,10 +14,6 @@ import TOMLKit
 
 @main
 struct Rocket: ParsableCommand {
-    var workingDirectory: Path {
-        Path.current
-    }
-    
     mutating func run() throws {
         /*
          
@@ -43,7 +39,11 @@ struct Rocket: ParsableCommand {
         let processablePaths = Path.allProcessableFilePaths(config: config)
         
         for path in processablePaths {
-            let context = try Context.page(at: path, config: config)
+            let context = try Context.page(
+                at: path,
+                config: config,
+                postContexts: globalContext.contexts(.posts) ?? []
+            )
             
             try processPage(context: context, globalContext: globalContext, environment: environment)
         }
