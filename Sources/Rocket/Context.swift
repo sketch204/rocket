@@ -1,4 +1,5 @@
 import DecodingUtils
+import Foundation
 import FrontMatterKit
 import PathKit
 
@@ -76,10 +77,32 @@ extension Context {
     }
     
     static func posts(config: Config) throws -> [Self] {
-        try Path.allPostPaths(config: config)
+        let output = try Path.allPostPaths(config: config)
             .map { path in
                 try page(at: path, config: config)
             }
+        
+        for post in output {
+            if post[.date] == nil {
+                throw MissingFrontMatterData(key: Context.Key.date.rawValue, path: (post[.inputPath] as? Path)?.string ?? "unknown path")
+            }
+            else if !(post[.date] is Date) {
+                throw InvalidFrontMatterDataType(
+                    key: Context.Key.date.rawValue,
+                    expectedType: String(describing: Date.self),
+                    actualType: String(describing: type(of: post[.date])),
+                    path: (post[.inputPath] as? Path)?.string ?? "unknown path"
+                )
+            }
+        }
+        
+        return output.sorted { c1, c2 in
+            guard let date1 = c1[.date] as? Date, let date2 = c2[.date] as? Date else {
+                return true
+            }
+            
+            return date1 > date2
+        }
     }
 }
 
@@ -161,4 +184,6 @@ extension Context.Key {
     
     static let layout = Self(rawValue: "layout")
     static let layoutBlockName = Self(rawValue: "layoutBlockName")
+    
+    static let date = Self(rawValue: "date")
 }
