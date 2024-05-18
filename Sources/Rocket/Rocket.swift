@@ -14,6 +14,14 @@ import TOMLKit
 
 @main
 struct Rocket: ParsableCommand {
+    @Option(
+        name: [.short, .customLong("config")],
+        help: "A path to a custom config file",
+        completion: .file(extensions: ["toml", "json", "yaml", "yml"]),
+        transform: { Path.current + Path($0) }
+    )
+    var configPath: Path?
+    
     mutating func run() throws {
         /*
          
@@ -29,8 +37,12 @@ struct Rocket: ParsableCommand {
          
          */
         
+        let config = if let configPath {
+            try Config(path: configPath)
+        } else {
+            try Config.loadDefault()
+        }
         
-        let config = try Config.loadDefault()
         let environment = createEnvironment(config: config)
         let globalContext = try Context.global(config: config)
         
