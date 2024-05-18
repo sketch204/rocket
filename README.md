@@ -80,3 +80,13 @@ Any value that is defined in the config file that does not match any of the abov
 ### Syntax Highlighting
 
 By default the markdown parser will parse all code blocks into a HTML blocks that are compatible with [Highlight.js](https://highlightjs.org/#as-html-tags)'s inline highlighting
+
+## Building
+
+The project can be opened and edited in Xcode. However to generate a release build, it's better to use the Swift CLI.
+
+```sh
+swift build -c release
+```
+
+By default the binary should then be located at `<project_dir>/.build/<arch>/release/Rocket`. You can then move this binary to a location that is included in your `$PATH` to be able to run this anywhere.
