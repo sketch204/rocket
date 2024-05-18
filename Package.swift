@@ -7,12 +7,7 @@ let package = Package(
     name: "Rocket",
     platforms: [.macOS(.v13)],
     products: [
-        .executable(name: "Rocket", targets: ["Rocket"]),
-        
-        .library(
-            name: "HTMLConversion",
-            targets: ["HTMLConversion"]
-        ),
+        .executable(name: "rocket", targets: ["Rocket"]),
     ],
     dependencies: [
         .package(url: "https://github.com/apple/swift-argument-parser.git", from: "1.2.0"),
