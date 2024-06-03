@@ -15,32 +15,6 @@ extension CustomTags {
             case profile
         }
         
-        static func makeExtension(with config: Config) -> Extension {
-            let ext = Extension()
-            
-            ext.registerSimpleTag("seo") { context in
-                SEO.generateContent(with: config, context: Context(dictionary: context.flatten()))
-            }
-            return ext
-        }
-        
-        static func generateContent(with config: Config, context: Context) -> String {
-            guard let seoContext = seoContext(from: config, context: context) else { return "" }
-            
-            return Self.init(config: config, seoContext: seoContext, context: context).generateContent()
-        }
-        
-        private static func seoContext(from config: Config, context: Context) -> Context? {
-            if let output = context.context("seo") {
-                output
-            } else if let seo = config.userProperties["seo"] as? [String: Any] {
-                Context(dictionary: seo)
-            } else {
-                nil
-            }
-        }
-        
-        
         let config: Config
         let seoContext: Context
         let context: Context
@@ -211,6 +185,35 @@ extension CustomTags {
  }</script>
 */
 
+
+// MARK: Extension
+
+extension CustomTags.SEO {
+    static func makeExtension(with config: Config) -> Extension {
+        let ext = Extension()
+        
+        ext.registerSimpleTag("seo") { context in
+            generateContent(with: config, context: Context(dictionary: context.flatten()))
+        }
+        return ext
+    }
+    
+    static func generateContent(with config: Config, context: Context) -> String {
+        guard let seoContext = seoContext(from: config, context: context) else { return "" }
+        
+        return Self.init(config: config, seoContext: seoContext, context: context).generateContent()
+    }
+    
+    private static func seoContext(from config: Config, context: Context) -> Context? {
+        if let output = context.context("seo") {
+            output
+        } else if let seo = config.userProperties["seo"] as? [String: Any] {
+            Context(dictionary: seo)
+        } else {
+            nil
+        }
+    }
+}
 
 
 // MARK: Tags
