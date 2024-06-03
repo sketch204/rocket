@@ -15,7 +15,7 @@ final class SEOTagTests: XCTestCase {
         let config = Config()
         let context = Context()
         
-        let content = SEO.generateContent(config: config, pageContext: context)
+        let content = SEO.generateContent(with: config, context: context)
         
         XCTAssertEqual(content, "")
     }
@@ -33,7 +33,7 @@ final class SEOTagTests: XCTestCase {
             ]
         )
         
-        let content = SEO.generateContent(config: config, pageContext: context)
+        let content = SEO.generateContent(with: config, context: context)
         let titleTag = "<title>\(title)</title>"
         let metaTitleTag = "<meta property=\"og:title\" content=\"\(title)\" />"
         
@@ -54,7 +54,7 @@ final class SEOTagTests: XCTestCase {
             "title": title
         ])
         
-        let content = SEO.generateContent(config: config, pageContext: context)
+        let content = SEO.generateContent(with: config, context: context)
         let titleTag = "<title>\(title)</title>"
         let metaTitleTag = "<meta property=\"og:title\" content=\"\(title)\" />"
         
@@ -72,7 +72,7 @@ final class SEOTagTests: XCTestCase {
             ]
         )
         
-        let content = SEO.generateContent(config: config, pageContext: context)
+        let content = SEO.generateContent(with: config, context: context)
         let siteNameTag = "<meta property=\"og:site_name\" content=\"\(title)\" />"
         
         XCTAssertTrue(content.contains(siteNameTag), "Meta site name tag '\(siteNameTag)', missing from '\(content)'")
@@ -91,7 +91,7 @@ final class SEOTagTests: XCTestCase {
             ]
         )
         
-        let content = SEO.generateContent(config: config, pageContext: context)
+        let content = SEO.generateContent(with: config, context: context)
         let metaDescriptionTag1 = "<meta property=\"og:description\" content=\"\(description)\" />"
         let metaDescriptionTag2 = "<meta name=\"description\" content=\"\(description)\" />"
         
@@ -113,7 +113,7 @@ final class SEOTagTests: XCTestCase {
             "description": description
         ])
         
-        let content = SEO.generateContent(config: config, pageContext: context)
+        let content = SEO.generateContent(with: config, context: context)
         let metaDescriptionTag1 = "<meta property=\"og:description\" content=\"\(description)\" />"
         let metaDescriptionTag2 = "<meta name=\"description\" content=\"\(description)\" />"
         
@@ -134,7 +134,7 @@ final class SEOTagTests: XCTestCase {
             ]
         )
         
-        let content = SEO.generateContent(config: config, pageContext: context)
+        let content = SEO.generateContent(with: config, context: context)
         let authorTag = "<meta name=\"author\" content=\"\(author)\" />"
         
         XCTAssertTrue(content.contains(authorTag), "Meta author tag '\(authorTag)', missing from '\(content)'")
@@ -161,7 +161,7 @@ final class SEOTagTests: XCTestCase {
             ]
         ])
         
-        let content = SEO.generateContent(config: config, pageContext: context)
+        let content = SEO.generateContent(with: config, context: context)
         let firstNameTag = "<meta name=\"profile:first_name\" content=\"\(firstName)\" />"
         let lastNameTag = "<meta name=\"profile:last_name\" content=\"\(lastName)\" />"
         let usernameTag = "<meta name=\"profile:username\" content=\"\(username)\" />"
@@ -191,7 +191,7 @@ final class SEOTagTests: XCTestCase {
             ]
         ])
         
-        let content = SEO.generateContent(config: config, pageContext: context)
+        let content = SEO.generateContent(with: config, context: context)
         let firstNameTag = "<meta name=\"profile:first_name\" content=\"\(firstName)\" />"
         let lastNameTag = "<meta name=\"profile:last_name\" content=\"\(lastName)\" />"
         let usernameTag = "<meta name=\"profile:username\" content=\"\(username)\" />"
@@ -214,7 +214,7 @@ final class SEOTagTests: XCTestCase {
             ]
         )
         
-        let content = SEO.generateContent(config: config, pageContext: context)
+        let content = SEO.generateContent(with: config, context: context)
         let localeTag = "<meta property=\"og:locale\" content=\"\(locale)\" />"
         
         XCTAssertTrue(content.contains(localeTag), "Meta locale tag '\(localeTag)', missing from '\(content)'")
@@ -228,7 +228,7 @@ final class SEOTagTests: XCTestCase {
             ]
         )
         
-        let content = SEO.generateContent(config: config, pageContext: context)
+        let content = SEO.generateContent(with: config, context: context)
         let localeTag = "<meta property=\"og:locale\" content=\"\(locale)\" />"
         
         XCTAssertTrue(content.contains(localeTag), "Meta locale tag '\(localeTag)', missing from '\(content)'")
@@ -252,7 +252,7 @@ final class SEOTagTests: XCTestCase {
             ]
         ])
         
-        let content = SEO.generateContent(config: config, pageContext: context)
+        let content = SEO.generateContent(with: config, context: context)
         let linkTag = "<link rel=\"canonical\" href=\"\(url)\" />"
         let metaTag = "<meta property=\"og:url\" content=\"\(url)\" />"
         
@@ -277,7 +277,7 @@ final class SEOTagTests: XCTestCase {
             ]
         ])
         
-        let content = SEO.generateContent(config: config, pageContext: context)
+        let content = SEO.generateContent(with: config, context: context)
         let linkTag = "<link rel=\"canonical\" href=\"\(url)\" />"
         let metaTag = "<meta property=\"og:url\" content=\"\(url)\" />"
         
@@ -295,7 +295,7 @@ final class SEOTagTests: XCTestCase {
             ]
         )
         
-        let content = SEO.generateContent(config: config, pageContext: context)
+        let content = SEO.generateContent(with: config, context: context)
         let generatorTag = "<meta name=\"generator\" content=\"Rocket\" />"
         
         XCTAssertTrue(content.contains(generatorTag), "Generator tag '\(generatorTag)', missing from '\(content)'")
@@ -312,7 +312,7 @@ final class SEOTagTests: XCTestCase {
             ]
         )
         
-        let content = SEO.generateContent(config: config, pageContext: context)
+        let content = SEO.generateContent(with: config, context: context)
         let typeTag = "<meta property=\"og:type\" content=\"\(type)\" />"
         
         XCTAssertTrue(content.contains(typeTag), "Type tag '\(typeTag)', missing from '\(content)'")
@@ -333,7 +333,7 @@ final class SEOTagTests: XCTestCase {
             ]
         ])
         
-        let content = SEO.generateContent(config: config, pageContext: context)
+        let content = SEO.generateContent(with: config, context: context)
         let typeTag = "<meta property=\"og:type\" content=\"\(type)\" />"
         
         XCTAssertTrue(content.contains(typeTag), "Type tag '\(typeTag)', missing from '\(content)'")
@@ -352,7 +352,7 @@ final class SEOTagTests: XCTestCase {
             ]
         ])
         
-        let content = SEO.generateContent(config: config, pageContext: context)
+        let content = SEO.generateContent(with: config, context: context)
         let typeTag = "<meta property=\"og:type\" content=\"\(type)\" />"
         
         XCTAssertTrue(content.contains(typeTag), "Type tag '\(typeTag)', missing from '\(content)'")
@@ -371,7 +371,7 @@ final class SEOTagTests: XCTestCase {
             ]
         ])
         
-        let content = SEO.generateContent(config: config, pageContext: context)
+        let content = SEO.generateContent(with: config, context: context)
         let typeTag = "<meta property=\"og:type\" content=\"\(type)\" />"
         
         XCTAssertTrue(content.contains(typeTag), "Type tag '\(typeTag)', missing from '\(content)'")
@@ -399,7 +399,7 @@ final class SEOTagTests: XCTestCase {
             ]
         ])
         
-        let content = SEO.generateContent(config: config, pageContext: context)
+        let content = SEO.generateContent(with: config, context: context)
         let dateTag = "<meta property=\"article:published_time\" content=\"2024-06-03T00:00:00-04:00\" />"
         
         XCTAssertTrue(content.contains(dateTag), "Date tag '\(dateTag)', missing from '\(content)'")
@@ -419,7 +419,7 @@ final class SEOTagTests: XCTestCase {
             ]
         ])
         
-        let content = SEO.generateContent(config: config, pageContext: context)
+        let content = SEO.generateContent(with: config, context: context)
         let tag1Html = "<meta property=\"article:tag\" content=\"\(tag1)\" />"
         let tag2Html = "<meta property=\"article:tag\" content=\"\(tag2)\" />"
         

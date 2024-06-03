@@ -2,7 +2,7 @@ import Foundation
 import Stencil
 
 extension CustomTags {
-    enum SEO {
+    struct SEO {
         static let formatter: DateFormatter = {
             let output = DateFormatter()
             output.dateFormat = "yyyy-MM-dd'T'HH:mm:ssZZZZZ"
@@ -19,32 +19,60 @@ extension CustomTags {
             let ext = Extension()
             
             ext.registerSimpleTag("seo") { context in
-                generateContent(
-                    config: config,
-                    pageContext: Context(dictionary: context.flatten())
-                )
+                SEO.generateContent(with: config, context: Context(dictionary: context.flatten()))
             }
             return ext
         }
         
-        static func generateContent(
-            config: Config,
-            pageContext: Context
-        ) -> String {
-            guard let seoContext = seoContext(from: config, context: pageContext) else { return "" }
+        static func generateContent(with config: Config, context: Context) -> String {
+            guard let seoContext = seoContext(from: config, context: context) else { return "" }
             
-            let pageContext = pageContext.context(.page)
-            let pageType = pageType(from: pageContext)
-            
-            func value(for key: String) -> String? {
-                pageContext?[key] as? String
-                    ?? seoContext[key] as? String
+            return Self.init(config: config, seoContext: seoContext, context: context).generateContent()
+        }
+        
+        private static func seoContext(from config: Config, context: Context) -> Context? {
+            if let output = context.context("seo") {
+                output
+            } else if let seo = config.userProperties["seo"] as? [String: Any] {
+                Context(dictionary: seo)
+            } else {
+                nil
             }
+        }
+        
+        
+        let config: Config
+        let seoContext: Context
+        let context: Context
+        
+        var pageContext: Context? {
+            context.context(.page)
+        }
+        fileprivate var pageType: PageType {
+            let isPost = (pageContext?[.isPost] as? Bool) ?? false
             
-            func subContext(for key: String) -> Context? {
-                pageContext?.context(key) ?? seoContext.context(key)
-            }
+            let rawOverrideType = (pageContext?["type"] as? String)?.lowercased()
+            let type = rawOverrideType.flatMap(PageType.init(rawValue:))
             
+            return type ?? (isPost ? .article : .website)
+        }
+        
+        private init(config: Config, seoContext: Context, context: Context) {
+            self.config = config
+            self.seoContext = seoContext
+            self.context = context
+        }
+        
+        func value(for key: String) -> String? {
+            pageContext?[key] as? String
+                ?? seoContext[key] as? String
+        }
+        
+        func subContext(for key: String) -> Context? {
+            pageContext?.context(key) ?? seoContext.context(key)
+        }
+        
+        func generateContent() -> String {
             var output: [Tag] = []
             
             if let title = value(for: "title") {
@@ -87,7 +115,7 @@ extension CustomTags {
             }
             
             if pageType == .article, let date = pageContext?[.date] as? Date {
-                output.append(MetaTag(property: "article:published_time", content: formatter.string(from: date)))
+                output.append(MetaTag(property: "article:published_time", content: Self.formatter.string(from: date)))
             }
             
             if let author = value(for: "author") {
@@ -107,25 +135,6 @@ extension CustomTags {
             }
             
             return output.map(\.html).joined(separator: "\n")
-        }
-        
-        private static func pageType(from pageContext: Context?) -> PageType {
-            let isPost = (pageContext?[.isPost] as? Bool) ?? false
-            
-            let rawOverrideType = (pageContext?["type"] as? String)?.lowercased()
-            let type = rawOverrideType.flatMap(PageType.init(rawValue:))
-            
-            return type ?? (isPost ? .article : .website)
-        }
-        
-        private static func seoContext(from config: Config, context: Context) -> Context? {
-            if let output = context.context("seo") {
-                output
-            } else if let seo = config.userProperties["seo"] as? [String: Any] {
-                Context(dictionary: seo)
-            } else {
-                nil
-            }
         }
     }
 }
