@@ -7,7 +7,7 @@ let package = Package(
     name: "Rocket",
     platforms: [.macOS(.v13)],
     products: [
-        .executable(name: "rocket", targets: ["Rocket"]),
+        .executable(name: "Rocket", targets: ["Rocket"]),
     ],
     dependencies: [
         .package(url: "https://github.com/apple/swift-argument-parser.git", from: "1.2.0"),
@@ -35,6 +35,7 @@ let package = Package(
             name: "RocketTests",
             dependencies: [
                 "Rocket",
+                .product(name: "PathKit", package: "PathKit"),
             ]
         ),
         

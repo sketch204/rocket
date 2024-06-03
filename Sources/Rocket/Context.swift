@@ -126,6 +126,10 @@ extension Context {
         output.merge(with: try page(path.read()))
         output[.inputPath] = path
         
+        if path.isInPostsPath(config: config) {
+            output[.isPost] = true
+        }
+        
         let outputPath = outputPath(for: path, config: config)
         
         output[.absoluteOutputPath] = outputPath
@@ -224,4 +228,6 @@ extension Context.Key {
     static let layoutBlockName = Self(rawValue: "layoutBlockName")
     
     static let date = Self(rawValue: "date")
+    
+    static let isPost = Self(rawValue: "isPost")
 }

@@ -25,11 +25,15 @@ extension Rocket {
                 try Config.loadDefault()
             }
             
+            var extensions = [Extension]()
+            extensions.append(contentsOf: CustomFilters.extensions(config: config))
+            extensions.append(contentsOf: CustomTags.extensions(config: config))
+            
             let environment = Environment(
                 loader: FileSystemLoader(
                     paths: [ config.templatesPath, config.includesPath ]
                 ),
-                extensions: CustomFilters.extensions(config: config),
+                extensions: extensions,
                 trimBehaviour: .smart
             )
             
