@@ -75,19 +75,36 @@ extension CustomTags {
         func generateContent() -> String {
             var output: [Tag] = []
             
+            output.append(contentsOf: generateTitleTags())
+            output.append(contentsOf: generateDescriptionTags())
+            output.append(contentsOf: generateCanonicalUrlTags())
+            output.append(contentsOf: generateArticleTags())
+            output.append(contentsOf: generateAuthorTags())
+            output.append(contentsOf: generateMiscTags())
+            
+            return output.map(\.html).joined(separator: "\n")
+        }
+        
+        private func generateTitleTags() -> [Tag] {
+            var output = [Tag]()
             if let title = value(for: "title") {
                 output.append(TitleTag(title: title))
                 output.append(MetaTag(property: "og:title", content: title))
             }
-            
+            return output
+        }
+        
+        private func generateDescriptionTags() -> [Tag] {
+            var output = [Tag]()
             if let description = value(for: "description") {
                 output.append(MetaTag(property: "og:description", content: description))
                 output.append(MetaTag(name: "description", content: description))
             }
-            
-            let locale = value(for: "locale") ?? "en_US"
-            output.append(MetaTag(property: "og:locale", content: locale))
-            
+            return output
+        }
+        
+        private func generateCanonicalUrlTags() -> [Tag] {
+            var output = [Tag]()
             if let outputPath = pageContext?[.outputPath],
                var siteUrl = seoContext["siteURL"] as? String
             {
@@ -99,25 +116,11 @@ extension CustomTags {
                 output.append(LinkTag(href: outputUrl))
                 output.append(MetaTag(property: "og:url", content: outputUrl))
             }
-            
-            if let siteTitle = seoContext["title"] as? String {
-                output.append(MetaTag(property: "og:site_name", content: siteTitle))
-            }
-            
-            output.append(MetaTag(property: "og:type", content: pageType.rawValue))
-            
-            output.append(MetaTag(name: "generator", content: "Rocket"))
-            
-            if let tags = pageContext?["tags"] as? [String] {
-                output.append(contentsOf: tags.map({
-                    MetaTag(property: "article:tag", content: $0)
-                }))
-            }
-            
-            if pageType == .article, let date = pageContext?[.date] as? Date {
-                output.append(MetaTag(property: "article:published_time", content: Self.formatter.string(from: date)))
-            }
-            
+            return output
+        }
+        
+        private func generateAuthorTags() -> [Tag] {
+            var output = [Tag]()
             if let author = value(for: "author") {
                 output.append(MetaTag(name: "author", content: author))
             }
@@ -133,8 +136,40 @@ extension CustomTags {
                     output.append(MetaTag(name: "profile:username", content: username))
                 }
             }
+            return output
+        }
+        
+        private func generateArticleTags() -> [Tag] {
+            var output = [Tag]()
             
-            return output.map(\.html).joined(separator: "\n")
+            if let tags = pageContext?["tags"] as? [String] {
+                output.append(contentsOf: tags.map({
+                    MetaTag(property: "article:tag", content: $0)
+                }))
+            }
+            
+            if pageType == .article, let date = pageContext?[.date] as? Date {
+                output.append(MetaTag(property: "article:published_time", content: Self.formatter.string(from: date)))
+            }
+            
+            return output
+        }
+        
+        private func generateMiscTags() -> [Tag] {
+            var output = [Tag]()
+            
+            output.append(MetaTag(property: "og:type", content: pageType.rawValue))
+            
+            if let siteTitle = seoContext["title"] as? String {
+                output.append(MetaTag(property: "og:site_name", content: siteTitle))
+            }
+            
+            let locale = value(for: "locale") ?? "en_US"
+            output.append(MetaTag(property: "og:locale", content: locale))
+            
+            output.append(MetaTag(name: "generator", content: "Rocket"))
+            
+            return output
         }
     }
 }
