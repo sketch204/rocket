@@ -157,7 +157,7 @@ final class SEOTagTests: XCTestCase {
         )
         let context = Context(dictionary: [
             "page": [
-                "type": "profile",
+                "pageType": "profile",
             ]
         ])
         
@@ -182,7 +182,7 @@ final class SEOTagTests: XCTestCase {
         )
         let context = Context(dictionary: [
             "page": [
-                "type": "profile",
+                "pageType": "profile",
                 "author": [
                     "firstName": firstName,
                     "lastName": lastName,
@@ -348,7 +348,7 @@ final class SEOTagTests: XCTestCase {
         )
         let context = Context(dictionary: [
             "page": [
-                "type": type
+                "pageType": type
             ]
         ])
         
@@ -367,7 +367,7 @@ final class SEOTagTests: XCTestCase {
         )
         let context = Context(dictionary: [
             "page": [
-                "type": type
+                "pageType": type
             ]
         ])
         
@@ -394,7 +394,7 @@ final class SEOTagTests: XCTestCase {
         )
         let context = Context(dictionary: [
             "page": [
-                "type": "article",
+                "pageType": "article",
                 "date": date
             ]
         ])

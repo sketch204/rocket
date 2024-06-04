@@ -1,6 +1,27 @@
 import Foundation
 import Stencil
 
+fileprivate extension Context.Key {
+    // Common Keys
+    static let title = Self(rawValue: "title")
+    static let description = Self(rawValue: "description")
+    static let author = Self(rawValue: "author")
+    
+    // SEO Context Keys
+    static let siteURL = Self(rawValue: "siteURL")
+    static let locale = Self(rawValue: "locale")
+    
+    // Page Keys
+    static let type = Self(rawValue: "pageType")
+    static let excerpt = Self(rawValue: "excerpt")
+    static let tags = Self(rawValue: "tags")
+    
+    // Author keys
+    static let firstName = Self(rawValue: "firstName")
+    static let lastName = Self(rawValue: "lastName")
+    static let username = Self(rawValue: "username")
+}
+
 extension CustomTags {
     struct SEO {
         static let formatter: DateFormatter = {
@@ -25,14 +46,14 @@ extension CustomTags {
         fileprivate var pageType: PageType {
             let isPost = (pageContext?[.isPost] as? Bool) ?? false
             
-            let rawOverrideType = (pageContext?["type"] as? String)?.lowercased()
+            let rawOverrideType = (pageContext?[.type] as? String)?.lowercased()
             let type = rawOverrideType.flatMap(PageType.init(rawValue:))
             
             return type ?? (isPost ? .article : .website)
         }
         var canonicalUrl: String? {
             guard let outputPath = pageContext?[.outputPath],
-                  var siteUrl = seoContext["siteURL"] as? String 
+                  var siteUrl = seoContext[.siteURL] as? String
             else { return nil }
             
             if siteUrl.hasSuffix("/") {
@@ -47,9 +68,17 @@ extension CustomTags {
             self.context = context
         }
         
+        func value(for key: Context.Key) -> String? {
+            value(for: key.rawValue)
+        }
+        
         func value(for key: String) -> String? {
             pageContext?[key] as? String
                 ?? seoContext[key] as? String
+        }
+        
+        func subContext(for key: Context.Key) -> Context? {
+            subContext(for: key.rawValue)
         }
         
         func subContext(for key: String) -> Context? {
@@ -74,7 +103,7 @@ extension CustomTags {
         
         private func generateTitleTags() -> [Tag] {
             var output = [Tag]()
-            if let title = value(for: "title") {
+            if let title = value(for: .title) {
                 output.append(TitleTag(title: title))
                 output.append(MetaTag(property: "og:title", content: title))
             }
@@ -83,7 +112,7 @@ extension CustomTags {
         
         private func generateDescriptionTags() -> [Tag] {
             var output = [Tag]()
-            if let description = value(for: "description") {
+            if let description = value(for: .description) {
                 output.append(MetaTag(property: "og:description", content: description))
                 output.append(MetaTag(name: "description", content: description))
             }
@@ -101,18 +130,18 @@ extension CustomTags {
         
         private func generateAuthorTags() -> [Tag] {
             var output = [Tag]()
-            if let author = value(for: "author") {
+            if let author = value(for: .author) {
                 output.append(MetaTag(name: "author", content: author))
             }
             
-            if pageType == .profile, let author = subContext(for: "author") {
-                if let firstName = author["firstName"] as? String {
+            if pageType == .profile, let author = subContext(for: .author) {
+                if let firstName = author[.firstName] as? String {
                     output.append(MetaTag(name: "profile:first_name", content: firstName))
                 }
-                if let lastName = author["lastName"] as? String {
+                if let lastName = author[.lastName] as? String {
                     output.append(MetaTag(name: "profile:last_name", content: lastName))
                 }
-                if let username = author["username"] as? String {
+                if let username = author[.username] as? String {
                     output.append(MetaTag(name: "profile:username", content: username))
                 }
             }
@@ -122,7 +151,7 @@ extension CustomTags {
         private func generateArticleTags() -> [Tag] {
             var output = [Tag]()
             
-            if let tags = pageContext?["tags"] as? [String] {
+            if let tags = pageContext?[.tags] as? [String] {
                 output.append(contentsOf: tags.map({
                     MetaTag(property: "article:tag", content: $0)
                 }))
@@ -140,11 +169,11 @@ extension CustomTags {
             
             output.append(MetaTag(property: "og:type", content: pageType.rawValue))
             
-            if let siteTitle = seoContext["title"] as? String {
+            if let siteTitle = seoContext[.title] as? String {
                 output.append(MetaTag(property: "og:site_name", content: siteTitle))
             }
             
-            let locale = value(for: "locale") ?? "en_US"
+            let locale = value(for: .locale) ?? "en_US"
             output.append(MetaTag(property: "og:locale", content: locale))
             
             output.append(MetaTag(name: "generator", content: "Rocket"))
@@ -154,9 +183,9 @@ extension CustomTags {
         
         private func generateLinkedJsonData() -> Tag? {
             let author: LinkedJSON.Person? =
-            if let author = subContext(for: "author"),
-                let firstName = author["firstName"] as? String,
-                let lastName = author["lastName"] as? String
+            if let author = subContext(for: .author),
+               let firstName = author[.firstName] as? String,
+               let lastName = author[.lastName] as? String
             {
                 LinkedJSON.Person(firstName: firstName, lastName: lastName)
             } else {
@@ -167,27 +196,26 @@ extension CustomTags {
             switch pageType {
             case .article:
                 guard let canonicalUrl, 
-                      let title = value(for: "title"),
-                      let date = pageContext?["date"] as? Date
+                        let title = value(for: .title),
+                      let date = pageContext?[.date] as? Date
                 else { return nil }
                 
                 linkedJsonData = LinkedJSON.BlogPosting(
                     name: title,
                     author: author,
-                    dateModified: nil,
                     datePublished: date,
-                    description: value(for: "description"),
-                    headline: value(for: "excerpt"),
+                    description: value(for: .description),
+                    headline: value(for: .excerpt),
                     url: canonicalUrl,
-                    keywords: pageContext?["tags"] as? [String]
+                    keywords: pageContext?[.tags] as? [String]
                 )
             case .website:
-                guard let canonicalUrl, let title = value(for: "title") else { return nil }
+                guard let canonicalUrl, let title = value(for: .title) else { return nil }
                 
                 linkedJsonData = LinkedJSON.WebSite(
                     author: author,
-                    description: value(for: "description"),
-                    headline: value(for: "excerpt"),
+                    description: value(for: .description),
+                    headline: value(for: .excerpt),
                     name: title,
                     url: canonicalUrl
                 )
@@ -379,7 +407,6 @@ extension CustomTags.SEO.LinkedJSON {
         static let type = "BlogPosting"
         var name: String
         var author: Person?
-        var dateModified: Date?
         var datePublished: Date
         var description: String?
         var headline: String?
@@ -391,7 +418,6 @@ extension CustomTags.SEO.LinkedJSON {
             case type = "@type"
             case name = "name"
             case author = "author"
-            case dateModified = "dateModified"
             case datePublished = "datePublished"
             case description = "description"
             case headline = "headline"
@@ -406,7 +432,6 @@ extension CustomTags.SEO.LinkedJSON {
             try container.encode(Self.type, forKey: .type)
             try container.encode(name, forKey: .name)
             try container.encodeIfPresent(author, forKey: .author)
-            try container.encodeIfPresent(dateModified, forKey: .dateModified)
             try container.encode(datePublished, forKey: .datePublished)
             try container.encodeIfPresent(description, forKey: .description)
             try container.encodeIfPresent(headline, forKey: .headline)
@@ -434,41 +459,3 @@ extension CustomTags.SEO.LinkedJSON {
         }
     }
 }
-
-
-/*
- 
- <script type="application/ld+json">
- {
- "@context":"https://schema.org",
- "@type":"WebSite",
- "author":{
-    "@type":"Person",
-    "name":"Inal Gotov"
- },
- "description":"Inal’s personal webpage!",
- "headline":"Inal Gotov",
- "name":"Inal Gotov",
- "url":"https://inalgotov.com/"
- }</script>
-
- 
- <script type="application/ld+json">
- {
- "@context":"https://schema.org",
- "@type":"BlogPosting",
- "author":{
-    "@type":"Person",
-    "name":"Inal Gotov"
- },
- "dateModified":"2023-09-07T00:00:00+00:00",
- "datePublished":"2023-09-07T00:00:00+00:00",
- "description":"An in-depth look at how Tables are implemented in SwiftUI",
- "headline":"How to use Tables in SwiftUI",
- "mainEntityOfPage":{
-    "@type":"WebPage",
-    "@id":"https://inalgotov.com/2023/09/07/how-to-use-tables-in-swiftui.html"
- },
- "url":"https://inalgotov.com/2023/09/07/how-to-use-tables-in-swiftui.html"
- }</script>
-*/
