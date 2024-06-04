@@ -135,10 +135,19 @@ extension CustomTags {
             }
             
             if pageType == .profile, let author = subContext(for: .author) {
-                if let firstName = author[.firstName] as? String {
+                let firstName = author[.firstName] as? String
+                let lastName = author[.lastName] as? String
+                
+                let fullName = [firstName, lastName].compactMap({ $0 }).joined(separator: " ")
+                
+                if !fullName.isEmpty {
+                    output.append(MetaTag(name: "author", content: fullName))
+                }
+                
+                if let firstName {
                     output.append(MetaTag(name: "profile:first_name", content: firstName))
                 }
-                if let lastName = author[.lastName] as? String {
+                if let lastName {
                     output.append(MetaTag(name: "profile:last_name", content: lastName))
                 }
                 if let username = author[.username] as? String {

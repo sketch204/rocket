@@ -165,10 +165,12 @@ final class SEOTagTests: XCTestCase {
         let firstNameTag = "<meta name=\"profile:first_name\" content=\"\(firstName)\" />"
         let lastNameTag = "<meta name=\"profile:last_name\" content=\"\(lastName)\" />"
         let usernameTag = "<meta name=\"profile:username\" content=\"\(username)\" />"
+        let authorTag = "<meta name=\"author\" content=\"\(firstName) \(lastName)\" />"
         
         XCTAssertTrue(content.contains(firstNameTag), "Meta first name author tag '\(firstNameTag)', missing from '\(content)'")
         XCTAssertTrue(content.contains(lastNameTag), "Meta last name author tag '\(lastNameTag)', missing from '\(content)'")
         XCTAssertTrue(content.contains(usernameTag), "Meta username author tag '\(usernameTag)', missing from '\(content)'")
+        XCTAssertTrue(content.contains(authorTag), "Meta author tag '\(authorTag)', missing from '\(content)'")
     }
     
     func test_generatesAuthorTags_forProfilePage_fromPageData() {
@@ -195,10 +197,12 @@ final class SEOTagTests: XCTestCase {
         let firstNameTag = "<meta name=\"profile:first_name\" content=\"\(firstName)\" />"
         let lastNameTag = "<meta name=\"profile:last_name\" content=\"\(lastName)\" />"
         let usernameTag = "<meta name=\"profile:username\" content=\"\(username)\" />"
+        let authorTag = "<meta name=\"author\" content=\"\(firstName) \(lastName)\" />"
         
         XCTAssertTrue(content.contains(firstNameTag), "Meta first name author tag '\(firstNameTag)', missing from '\(content)'")
         XCTAssertTrue(content.contains(lastNameTag), "Meta last name author tag '\(lastNameTag)', missing from '\(content)'")
         XCTAssertTrue(content.contains(usernameTag), "Meta username author tag '\(usernameTag)', missing from '\(content)'")
+        XCTAssertTrue(content.contains(authorTag), "Meta author tag '\(authorTag)', missing from '\(content)'")
     }
     
     
