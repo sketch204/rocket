@@ -81,6 +81,10 @@ Any value that is defined in the config file that does not match any of the abov
 
 By default the markdown parser will parse all code blocks into a HTML blocks that are compatible with [Highlight.js](https://highlightjs.org/#as-html-tags)'s inline highlighting
 
+### More
+
+- [SEO](Docs/SEO.md)
+
 ## Building
 
 The project can be opened and edited in Xcode. However to generate a release build, it's better to use the Swift CLI.
