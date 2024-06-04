@@ -30,6 +30,16 @@ extension CustomTags {
             
             return type ?? (isPost ? .article : .website)
         }
+        var canonicalUrl: String? {
+            guard let outputPath = pageContext?[.outputPath],
+                  var siteUrl = seoContext["siteURL"] as? String 
+            else { return nil }
+            
+            if siteUrl.hasSuffix("/") {
+                siteUrl.removeLast()
+            }
+            return "\(siteUrl)\(outputPath)"
+        }
         
         private init(config: Config, seoContext: Context, context: Context) {
             self.config = config
@@ -55,6 +65,9 @@ extension CustomTags {
             output.append(contentsOf: generateArticleTags())
             output.append(contentsOf: generateAuthorTags())
             output.append(contentsOf: generateMiscTags())
+            if let linkedJson = generateLinkedJsonData() {
+                output.append(linkedJson)
+            }
             
             return output.map(\.html).joined(separator: "\n")
         }
@@ -79,16 +92,9 @@ extension CustomTags {
         
         private func generateCanonicalUrlTags() -> [Tag] {
             var output = [Tag]()
-            if let outputPath = pageContext?[.outputPath],
-               var siteUrl = seoContext["siteURL"] as? String
-            {
-                if siteUrl.hasSuffix("/") {
-                    siteUrl.removeLast()
-                }
-                let outputUrl = "\(siteUrl)\(outputPath)"
-                
-                output.append(LinkTag(href: outputUrl))
-                output.append(MetaTag(property: "og:url", content: outputUrl))
+            if let canonicalUrl = canonicalUrl {
+                output.append(LinkTag(href: canonicalUrl))
+                output.append(MetaTag(property: "og:url", content: canonicalUrl))
             }
             return output
         }
@@ -145,45 +151,64 @@ extension CustomTags {
             
             return output
         }
+        
+        private func generateLinkedJsonData() -> Tag? {
+            let author: LinkedJSON.Person? =
+            if let author = subContext(for: "author"),
+                let firstName = author["firstName"] as? String,
+                let lastName = author["lastName"] as? String
+            {
+                LinkedJSON.Person(firstName: firstName, lastName: lastName)
+            } else {
+                nil
+            }
+            
+            let linkedJsonData: LinkedJSONData
+            switch pageType {
+            case .article:
+                guard let canonicalUrl, 
+                      let title = value(for: "title"),
+                      let date = pageContext?["date"] as? Date
+                else { return nil }
+                
+                linkedJsonData = LinkedJSON.BlogPosting(
+                    name: title,
+                    author: author,
+                    dateModified: nil,
+                    datePublished: date,
+                    description: value(for: "description"),
+                    headline: value(for: "excerpt"),
+                    url: canonicalUrl,
+                    keywords: pageContext?["tags"] as? [String]
+                )
+            case .website:
+                guard let canonicalUrl, let title = value(for: "title") else { return nil }
+                
+                linkedJsonData = LinkedJSON.WebSite(
+                    author: author,
+                    description: value(for: "description"),
+                    headline: value(for: "excerpt"),
+                    name: title,
+                    url: canonicalUrl
+                )
+            case .profile:
+                guard let author else { return nil }
+                
+                linkedJsonData = author
+            }
+            
+            let linkedJson = LinkedJSON(data: linkedJsonData)
+            
+            do {
+                let html = try linkedJson.html
+                return RawTag(html: html)
+            } catch {
+                print("WARNING: Failed to generate Linked Data JSON due to error! \(error)")
+                return nil
+            }
+        }
     }
 }
-
-/*
- 
- <script type="application/ld+json">
- {
- "@context":"https://schema.org",
- "@type":"WebSite",
- "author":{
-    "@type":"Person",
-    "name":"Inal Gotov"
- },
- "description":"Inal’s personal webpage!",
- "headline":"Inal Gotov",
- "name":"Inal Gotov",
- "url":"https://inalgotov.com/"
- }</script>
-
- 
- <script type="application/ld+json">
- {
- "@context":"https://schema.org",
- "@type":"BlogPosting",
- "author":{
-    "@type":"Person",
-    "name":"Inal Gotov"
- },
- "dateModified":"2023-09-07T00:00:00+00:00",
- "datePublished":"2023-09-07T00:00:00+00:00",
- "description":"An in-depth look at how Tables are implemented in SwiftUI",
- "headline":"How to use Tables in SwiftUI",
- "mainEntityOfPage":{
-    "@type":"WebPage",
-    "@id":"https://inalgotov.com/2023/09/07/how-to-use-tables-in-swiftui.html"
- },
- "url":"https://inalgotov.com/2023/09/07/how-to-use-tables-in-swiftui.html"
- }</script>
-*/
 
 
 // MARK: Extension
@@ -223,6 +248,10 @@ fileprivate protocol Tag {
 }
 
 extension CustomTags.SEO {
+    fileprivate struct RawTag: Tag {
+        var html: String
+    }
+    
     fileprivate struct TitleTag: Tag {
         var title: String
         
@@ -260,3 +289,186 @@ extension CustomTags.SEO {
         }
     }
 }
+
+extension CustomTags.SEO {
+    fileprivate struct LinkedJSON {
+        static let schema = "https://schema.org"
+        
+        let data: LinkedJSONData
+        
+        var html: String {
+            get throws {
+                let encoder = JSONEncoder()
+                encoder.dateEncodingStrategy = .formatted(CustomTags.SEO.formatter)
+                encoder.outputFormatting = [.sortedKeys]
+                let json = try encoder.encode(data)
+                guard let jsonString = String(data: json, encoding: .utf8) else {
+                    throw LinkedJSONDataEncodingError()
+                }
+                return """
+                <script type="application/ld+json">
+                \(jsonString.replacingOccurrences(of: "\\", with: ""))
+                </script>
+                """
+            }
+        }
+    }
+}
+
+extension CustomTags.SEO {
+    struct LinkedJSONDataEncodingError: Error {}
+}
+
+fileprivate protocol LinkedJSONData: Encodable {}
+
+extension CustomTags.SEO.LinkedJSON {
+    struct Person: LinkedJSONData {
+        static let type = "Person"
+        
+        var firstName: String
+        var lastName: String
+        
+        enum CodingKeys: String, CodingKey {
+            case context = "@context"
+            case type = "@type"
+            case firstName = "givenName"
+            case lastName = "familyName"
+        }
+        
+        func encode(to encoder: any Encoder) throws {
+            var container = encoder.container(keyedBy: CodingKeys.self)
+            try container.encode(CustomTags.SEO.LinkedJSON.schema, forKey: .context)
+            try container.encode(Self.type, forKey: .type)
+            try container.encode(firstName, forKey: .firstName)
+            try container.encode(lastName, forKey: .lastName)
+        }
+    }
+    
+    struct WebSite: LinkedJSONData {
+        static let type = "WebSite"
+        var author: Person?
+        var description: String?
+        var headline: String?
+        var name: String
+        var url: String
+        
+        enum CodingKeys: String, CodingKey {
+            case context = "@context"
+            case type = "@type"
+            case author = "author"
+            case description = "description"
+            case headline = "headline"
+            case name = "name"
+            case url = "url"
+        }
+        
+        func encode(to encoder: any Encoder) throws {
+            var container = encoder.container(keyedBy: CodingKeys.self)
+            try container.encode(CustomTags.SEO.LinkedJSON.schema, forKey: .context)
+            try container.encode(Self.type, forKey: .type)
+            
+            try container.encodeIfPresent(author, forKey: .author)
+            try container.encodeIfPresent(description, forKey: .description)
+            try container.encodeIfPresent(headline, forKey: .headline)
+            try container.encode(name, forKey: .name)
+            try container.encode(url, forKey: .url)
+        }
+    }
+    
+    struct BlogPosting: LinkedJSONData {
+        static let type = "BlogPosting"
+        var name: String
+        var author: Person?
+        var dateModified: Date?
+        var datePublished: Date
+        var description: String?
+        var headline: String?
+        var url: String
+        var keywords: [String]?
+        
+        enum CodingKeys: String, CodingKey {
+            case context = "@context"
+            case type = "@type"
+            case name = "name"
+            case author = "author"
+            case dateModified = "dateModified"
+            case datePublished = "datePublished"
+            case description = "description"
+            case headline = "headline"
+            case mainEntityOfPage = "mainEntityOfPage"
+            case url = "url"
+            case keywords = "keywords"
+        }
+        
+        func encode(to encoder: any Encoder) throws {
+            var container = encoder.container(keyedBy: CodingKeys.self)
+            try container.encode(CustomTags.SEO.LinkedJSON.schema, forKey: .context)
+            try container.encode(Self.type, forKey: .type)
+            try container.encode(name, forKey: .name)
+            try container.encodeIfPresent(author, forKey: .author)
+            try container.encodeIfPresent(dateModified, forKey: .dateModified)
+            try container.encode(datePublished, forKey: .datePublished)
+            try container.encodeIfPresent(description, forKey: .description)
+            try container.encodeIfPresent(headline, forKey: .headline)
+            try container.encode(WebPage(id: url), forKey: .mainEntityOfPage)
+            try container.encode(url, forKey: .url)
+            try container.encodeIfPresent(keywords?.joined(separator: ","), forKey: .keywords)
+        }
+    }
+    
+    struct WebPage: LinkedJSONData {
+        static let type = "WebPage"
+        var id: String
+        
+        enum CodingKeys: String, CodingKey {
+            case context = "@context"
+            case type = "@type"
+            case id = "@id"
+        }
+        
+        func encode(to encoder: any Encoder) throws {
+            var container = encoder.container(keyedBy: CodingKeys.self)
+            try container.encode(CustomTags.SEO.LinkedJSON.schema, forKey: .context)
+            try container.encode(Self.type, forKey: .type)
+            try container.encode(id, forKey: .id)
+        }
+    }
+}
+
+
+/*
+ 
+ <script type="application/ld+json">
+ {
+ "@context":"https://schema.org",
+ "@type":"WebSite",
+ "author":{
+    "@type":"Person",
+    "name":"Inal Gotov"
+ },
+ "description":"Inal’s personal webpage!",
+ "headline":"Inal Gotov",
+ "name":"Inal Gotov",
+ "url":"https://inalgotov.com/"
+ }</script>
+
+ 
+ <script type="application/ld+json">
+ {
+ "@context":"https://schema.org",
+ "@type":"BlogPosting",
+ "author":{
+    "@type":"Person",
+    "name":"Inal Gotov"
+ },
+ "dateModified":"2023-09-07T00:00:00+00:00",
+ "datePublished":"2023-09-07T00:00:00+00:00",
+ "description":"An in-depth look at how Tables are implemented in SwiftUI",
+ "headline":"How to use Tables in SwiftUI",
+ "mainEntityOfPage":{
+    "@type":"WebPage",
+    "@id":"https://inalgotov.com/2023/09/07/how-to-use-tables-in-swiftui.html"
+ },
+ "url":"https://inalgotov.com/2023/09/07/how-to-use-tables-in-swiftui.html"
+ }</script>
+*/

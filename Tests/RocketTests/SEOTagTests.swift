@@ -426,4 +426,31 @@ final class SEOTagTests: XCTestCase {
         XCTAssertTrue(content.contains(tag1Html), "Tag '\(tag1Html)', missing from '\(content)'")
         XCTAssertTrue(content.contains(tag2Html), "Tag '\(tag2Html)', missing from '\(content)'")
     }
+    
+    func test_generatesLinkedJsonTags() {
+        let url = "https://example.com"
+        let title = "Website Title"
+        let config = Config(
+            userProperties: [
+                "seo": [
+                    "title": title,
+                    "siteURL": url,
+                ]
+            ]
+        )
+        let context = Context(dictionary: [
+            "page": [
+                "outputPath": Path("path/to/file"),
+            ]
+        ])
+        
+        let content = SEO.generateContent(with: config, context: context)
+        let linkedJsonTag = """
+        <script type="application/ld+json">
+        {"@context":"https://schema.org","@type":"WebSite","name":"Website Title","url":"https://example.compath/to/file"}
+        </script>
+        """
+        
+        XCTAssertTrue(content.contains(linkedJsonTag), "Linked JSON tag '\(linkedJsonTag)', missing from '\(content)'")
+    }
 }
