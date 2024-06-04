@@ -133,8 +133,7 @@ extension CustomTags {
             if let author = value(for: .author) {
                 output.append(MetaTag(name: "author", content: author))
             }
-            
-            if pageType == .profile, let author = subContext(for: .author) {
+            else if let author = subContext(for: .author) {
                 let firstName = author[.firstName] as? String
                 let lastName = author[.lastName] as? String
                 
@@ -144,14 +143,16 @@ extension CustomTags {
                     output.append(MetaTag(name: "author", content: fullName))
                 }
                 
-                if let firstName {
-                    output.append(MetaTag(name: "profile:first_name", content: firstName))
-                }
-                if let lastName {
-                    output.append(MetaTag(name: "profile:last_name", content: lastName))
-                }
-                if let username = author[.username] as? String {
-                    output.append(MetaTag(name: "profile:username", content: username))
+                if pageType == .profile {
+                    if let firstName {
+                        output.append(MetaTag(name: "profile:first_name", content: firstName))
+                    }
+                    if let lastName {
+                        output.append(MetaTag(name: "profile:last_name", content: lastName))
+                    }
+                    if let username = author[.username] as? String {
+                        output.append(MetaTag(name: "profile:username", content: username))
+                    }
                 }
             }
             return output
