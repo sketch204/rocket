@@ -2,9 +2,9 @@ import Foundation
 import Markdown
 
 /// Options given to the ``HTMLFormatter``.
-struct HTMLFormatterOptions: OptionSet {
-    var rawValue: UInt
-    init(rawValue: UInt) {
+public struct HTMLFormatterOptions: OptionSet {
+    public var rawValue: UInt
+    public init(rawValue: UInt) {
         self.rawValue = rawValue
     }
 
@@ -20,30 +20,34 @@ struct HTMLFormatterOptions: OptionSet {
     ///   ```markdown
     ///   > This is a compound sentence: It contains two clauses separated by a colon.
     ///   ```
-    static let parseAsides = HTMLFormatterOptions(rawValue: 1 << 0)
+    public static let parseAsides = HTMLFormatterOptions(rawValue: 1 << 0)
 
     /// Parse inline attributes as JSON and use the `"class"` property as the resulting span's `class`.
-    static let parseInlineAttributeClass = HTMLFormatterOptions(rawValue: 1 << 1)
+    public static let parseInlineAttributeClass = HTMLFormatterOptions(rawValue: 1 << 1)
     
-    static let escapeHTMLReservedSymbols = HTMLFormatterOptions(rawValue: 1 << 2)
+    public static let escapeHTMLReservedSymbols = HTMLFormatterOptions(rawValue: 1 << 2)
     
-    static let injectAsideTitles = HTMLFormatterOptions(rawValue: 1 << 3)
+    public static let injectAsideTitles = HTMLFormatterOptions(rawValue: 1 << 3)
+    
+    /// When this option is enabled, all headings will have their ID field populated with the heading's simplified contents.
+    public static let generateHeadingIDs = HTMLFormatterOptions(rawValue: 1 << 4)
 }
 
 extension HTMLFormatterOptions {
-    static let defaultOptions: HTMLFormatterOptions = [.parseAsides, .parseInlineAttributeClass, escapeHTMLReservedSymbols, .injectAsideTitles]
+    public static let defaultOptions: HTMLFormatterOptions = [.parseAsides, .parseInlineAttributeClass, escapeHTMLReservedSymbols, .injectAsideTitles, .generateHeadingIDs]
 }
 
 /// A ``MarkupWalker`` that prints rendered HTML for a given ``Markup`` tree.
 struct HTMLFormatter: MarkupWalker {
     /// The resulting HTML built up after printing.
-    var result = ""
+    private(set) var result = ""
 
     let options: HTMLFormatterOptions
 
-    var inTableHead = false
-    var tableColumnAlignments: [Table.ColumnAlignment?]? = nil
-    var currentTableColumn = 0
+    private var inTableHead = false
+    private var tableColumnAlignments: [Table.ColumnAlignment?]? = nil
+    private var currentTableColumn = 0
+    private var headingIdGenerator = HeadingIDGenerator()
 
     init(options: HTMLFormatterOptions = .defaultOptions) {
         self.options = options
@@ -93,8 +97,12 @@ struct HTMLFormatter: MarkupWalker {
         result += "<pre><code\(languageAttr)>\(htmlEncoded(codeBlock.code))</code></pre>\n"
     }
 
-    mutating func visitHeading(_ heading: Heading) -> () {
-        printInline(tag: "h\(heading.level)", content: htmlEncoded(heading.plainText))
+    mutating func visitHeading(_ heading: Heading) {
+        var attributes = [String: String]()
+        if options.contains(.generateHeadingIDs) {
+            attributes["id"] = headingIdGenerator.generateHeadingId(from: htmlEncoded(heading.plainText))
+        }
+        printInline(tag: "h\(heading.level)", attributes: attributes, content: htmlEncoded(heading.plainText))
     }
 
     mutating func visitThematicBreak(_ thematicBreak: ThematicBreak) -> () {
@@ -315,7 +323,7 @@ struct HTMLFormatter: MarkupWalker {
     
     // MARK: Misc
     
-    func htmlEncoded(_ string: String) -> String {
+    private func htmlEncoded(_ string: String) -> String {
         if options.contains(.escapeHTMLReservedSymbols) {
             string.htmlEncoded
         } else {
@@ -323,11 +331,23 @@ struct HTMLFormatter: MarkupWalker {
         }
     }
     
-    mutating func printInline(tag: String, content: String) {
-        result += "<\(tag)>\(htmlEncoded(content))</\(tag)>"
+    private mutating func printInline(tag: String, attributes: [String: String] = [:], content: String) {
+        let attributeString = if attributes.isEmpty {
+            ""
+        } else {
+            " " + attributeHtmlString(attributes: attributes)
+        }
+        result += "<\(tag)\(attributeString)>\(htmlEncoded(content))</\(tag)>"
+    }
+    
+    private func attributeHtmlString(attributes: [String: String]) -> String {
+        attributes.map { (key: String, value: String) in
+            "\(htmlEncoded(key))=\"\(htmlEncoded(value))\""
+        }
+        .joined(separator: " ")
     }
 
-    mutating func printInline(tag: String, _ inline: InlineMarkup) {
+    private mutating func printInline(tag: String, _ inline: InlineMarkup) {
         printInline(tag: tag, content: inline.plainText)
     }
 }

@@ -81,9 +81,21 @@ Any value that is defined in the config file that does not match any of the abov
 
 By default the markdown parser will parse all code blocks into a HTML blocks that are compatible with [Highlight.js](https://highlightjs.org/#as-html-tags)'s inline highlighting
 
+### Table of Contents
+
+Rocket provides a means for you to generate a table of contents. For any markdown file, the `page` object will have an array called `tableOfContents`. Each object in that array will consist of
+- `contents`: The raw contents of the heading as it appears on the page.
+- `level`: The level of the heading. You can use this to indent the entries of your table of contents.
+- `id`: An ID that will be attached to the heading. You can use this as the `href` of an anchor tag.
+
+Alternatively you can also use the `{% table_of_contents %}` tag. This tag will generate an automatically nested `<ul>` list containing links to each heading in the article.
+
+You can control whether table of contents are generated for individual pages using the boolean `generateTOC` property in the page front-matter.
+
 ### More
 
 - [SEO](Docs/SEO.md)
+- [Misc](Docs/Misc.md)
 
 ## Building
 

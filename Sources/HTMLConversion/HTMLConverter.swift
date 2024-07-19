@@ -9,21 +9,22 @@ public enum HTMLConverter {
     }
     .ignoresCase()
     
-    public static func convert(markdown: String) -> String {
+    public static func convert(markdown: String, options: HTMLFormatterOptions = .defaultOptions) -> String {
         if startWithDocTypePrefix(markdown) {
             let markdown = removeDocTypePrefix(from: markdown)
-            let html = convertToHTML(markdown)
+            let html = convertToHTML(markdown, options: options)
             let output = addDocTypePrefix(to: html)
             return output
         } 
         else {
-            return convertToHTML(markdown)
+            return convertToHTML(markdown, options: options)
         }
     }
     
-    private static func convertToHTML(_ markdown: String) -> String {
+    private static func convertToHTML(_ markdown: String, options: HTMLFormatterOptions) -> String {
         HTMLFormatter.format(
-            Document(parsing: markdown, options: [.disableSmartOpts])
+            Document(parsing: markdown, options: [.disableSmartOpts]),
+            options: options
         )
     }
     

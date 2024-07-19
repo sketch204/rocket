@@ -99,13 +99,19 @@ extension Rocket.Build {
         guard let inputPath = context[.inputPath] as? Path,
               let outputPath = context[.absoluteOutputPath] as? Path
         else { throw InvalidContext(description: "Input or output paths missing") }
+        var context = context
         
         print("Processing file at \(inputPath)")
         
-        var pageContext = globalContext
-        pageContext["page"] = context.dictionary
-        
         var pageContents: String = try inputPath.read()
+        
+        if context[.generateTOC] as? Bool ?? true {
+            let tableOfContents = TOCGenerator.generate(from: pageContents)
+            context[.tableOfContents] = tableOfContents.contextRepresentation
+        }
+        
+        var pageContext = globalContext
+        pageContext[.page] = context.dictionary
         
         pageContents = try parsePage(pageContents, context: pageContext, environment: environment)
         

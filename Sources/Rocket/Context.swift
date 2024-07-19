@@ -230,4 +230,7 @@ extension Context.Key {
     static let date = Self(rawValue: "date")
     
     static let isPost = Self(rawValue: "isPost")
+    
+    static let generateTOC = Self(rawValue: "generateTOC")
+    static let tableOfContents = Self(rawValue: "tableOfContents")
 }
